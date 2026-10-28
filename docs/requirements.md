@@ -23,9 +23,9 @@
 | Надпись SNAKE: пиксельное граффити, переливание, наклон к курсору | `menu/` | ⬜ |
 | Пункты: Play / Settings / Exit (Exit закрывает игру, на Android его нет) | `menu/` | ⬜ |
 | По Play камера едет к Game Boy, руки поднимают его | `menu/` | ⬜ |
-| Меню Game Boy: Play → Easy / Normal / Hard, Leaderboard, курсор-треугольник | `screen/` | ⬜ |
+| Меню Game Boy: Play → Easy / Normal / Hard, Leaderboard, курсор-треугольник | `screen/` | 🟨 |
 | Game Over на Game Boy со счётом и рестартом | `screen/` | 🟨 |
-| Лидерборд локальный, отдельно Normal и Hard, ввод трёх букв | `screen/`, `autoload/` | ⬜ |
+| Лидерборд локальный, отдельно Normal и Hard, ввод трёх букв | `screen/`, `autoload/` | 🟨 |
 | Esc: Продолжить / Настройки / Выйти в главное меню | `menu/` | ⬜ |
 | Настройки: громкость музыки, громкость эффектов, переназначение клавиш, язык EN/RU | `menu/`, `autoload/` | ⬜ |
 
