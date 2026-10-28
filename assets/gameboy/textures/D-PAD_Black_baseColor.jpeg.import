@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cybxpdlocn72t"
 path.s3tc="res://.godot/imported/D-PAD_Black_baseColor.jpeg-2288f8b8b0c8a5d449a01827c0677f62.s3tc.ctex"
+path.etc2="res://.godot/imported/D-PAD_Black_baseColor.jpeg-2288f8b8b0c8a5d449a01827c0677f62.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/gameboy/textures/D-PAD_Black_baseColor.jpeg"
-dest_files=["res://.godot/imported/D-PAD_Black_baseColor.jpeg-2288f8b8b0c8a5d449a01827c0677f62.s3tc.ctex"]
+dest_files=["res://.godot/imported/D-PAD_Black_baseColor.jpeg-2288f8b8b0c8a5d449a01827c0677f62.s3tc.ctex", "res://.godot/imported/D-PAD_Black_baseColor.jpeg-2288f8b8b0c8a5d449a01827c0677f62.etc2.ctex"]
 
 [params]
 
@@ -37,5 +38,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=512
 detect_3d/compress_to=0

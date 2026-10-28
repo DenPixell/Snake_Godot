@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cjv5a5tqqa2t6"
 path.s3tc="res://.godot/imported/A_B_Buttons_metallicRoughness.png-1dd58c817424b42086ae2f752c9505dc.s3tc.ctex"
+path.etc2="res://.godot/imported/A_B_Buttons_metallicRoughness.png-1dd58c817424b42086ae2f752c9505dc.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/gameboy/textures/A_B_Buttons_metallicRoughness.png"
-dest_files=["res://.godot/imported/A_B_Buttons_metallicRoughness.png-1dd58c817424b42086ae2f752c9505dc.s3tc.ctex"]
+dest_files=["res://.godot/imported/A_B_Buttons_metallicRoughness.png-1dd58c817424b42086ae2f752c9505dc.s3tc.ctex", "res://.godot/imported/A_B_Buttons_metallicRoughness.png-1dd58c817424b42086ae2f752c9505dc.etc2.ctex"]
 
 [params]
 
@@ -37,5 +38,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=512
 detect_3d/compress_to=0

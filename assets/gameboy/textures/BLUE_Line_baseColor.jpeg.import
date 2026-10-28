@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://chp0d5v3f0dtc"
 path.s3tc="res://.godot/imported/BLUE_Line_baseColor.jpeg-36d88f73e00868d367a823e5bab9b627.s3tc.ctex"
+path.etc2="res://.godot/imported/BLUE_Line_baseColor.jpeg-36d88f73e00868d367a823e5bab9b627.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/gameboy/textures/BLUE_Line_baseColor.jpeg"
-dest_files=["res://.godot/imported/BLUE_Line_baseColor.jpeg-36d88f73e00868d367a823e5bab9b627.s3tc.ctex"]
+dest_files=["res://.godot/imported/BLUE_Line_baseColor.jpeg-36d88f73e00868d367a823e5bab9b627.s3tc.ctex", "res://.godot/imported/BLUE_Line_baseColor.jpeg-36d88f73e00868d367a823e5bab9b627.etc2.ctex"]
 
 [params]
 
@@ -37,5 +38,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=512
 detect_3d/compress_to=0

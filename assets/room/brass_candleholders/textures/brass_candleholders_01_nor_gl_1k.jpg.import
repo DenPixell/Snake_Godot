@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cwokogemr1ujp"
 path.s3tc="res://.godot/imported/brass_candleholders_01_nor_gl_1k.jpg-85e3eee40ee24e7b0edcc2b148eec370.s3tc.ctex"
+path.etc2="res://.godot/imported/brass_candleholders_01_nor_gl_1k.jpg-85e3eee40ee24e7b0edcc2b148eec370.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/room/brass_candleholders/textures/brass_candleholders_01_nor_gl_1k.jpg"
-dest_files=["res://.godot/imported/brass_candleholders_01_nor_gl_1k.jpg-85e3eee40ee24e7b0edcc2b148eec370.s3tc.ctex"]
+dest_files=["res://.godot/imported/brass_candleholders_01_nor_gl_1k.jpg-85e3eee40ee24e7b0edcc2b148eec370.s3tc.ctex", "res://.godot/imported/brass_candleholders_01_nor_gl_1k.jpg-85e3eee40ee24e7b0edcc2b148eec370.etc2.ctex"]
 
 [params]
 

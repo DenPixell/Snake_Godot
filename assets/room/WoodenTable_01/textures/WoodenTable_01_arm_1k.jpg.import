@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://ceq66ejqsaei7"
 path.s3tc="res://.godot/imported/WoodenTable_01_arm_1k.jpg-4876706253d5bb6023bcb04c752f62b0.s3tc.ctex"
+path.etc2="res://.godot/imported/WoodenTable_01_arm_1k.jpg-4876706253d5bb6023bcb04c752f62b0.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/room/WoodenTable_01/textures/WoodenTable_01_arm_1k.jpg"
-dest_files=["res://.godot/imported/WoodenTable_01_arm_1k.jpg-4876706253d5bb6023bcb04c752f62b0.s3tc.ctex"]
+dest_files=["res://.godot/imported/WoodenTable_01_arm_1k.jpg-4876706253d5bb6023bcb04c752f62b0.s3tc.ctex", "res://.godot/imported/WoodenTable_01_arm_1k.jpg-4876706253d5bb6023bcb04c752f62b0.etc2.ctex"]
 
 [params]
 
