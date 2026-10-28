@@ -15,10 +15,10 @@ var _look := Vector2.ZERO
 var _time := 0.0
 
 
-func place(eye: Vector3, target: Vector3) -> void:
-	global_position = eye
-	look_at(target)
-	_base = global_transform
+## Положение, вокруг которого камера «дышит» и поворачивается мышью.
+func set_base(base: Transform3D) -> void:
+	_base = base
+	global_transform = base
 
 
 func _ready() -> void:
@@ -26,6 +26,10 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Esc отпускает мышь, повторный Esc снова захватывает. Позже здесь откроется меню паузы.
+	if event.is_action_pressed("pause_menu"):
+		var captured := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if captured else Input.MOUSE_MODE_CAPTURED
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_look -= event.relative * MOUSE_SENSITIVITY
 		_look = _look.clamp(-LOOK_LIMIT, LOOK_LIMIT)

@@ -21,6 +21,14 @@ func _ready() -> void:
 	_apply_default_input()
 
 
+## F11 — полноэкранный режим и обратно.
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F11:
+		var fullscreen := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED if fullscreen \
+				else DisplayServer.WINDOW_MODE_FULLSCREEN)
+
+
 func _apply_default_input() -> void:
 	for action: String in DEFAULT_KEYS:
 		var event := InputEventKey.new()

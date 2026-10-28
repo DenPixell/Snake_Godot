@@ -1,37 +1,49 @@
 class_name Hands
 extends Node3D
-## Руки от первого лица. Берём готовую позу из модели и доворачиваем кости,
-## чтобы ладони держали Game Boy, а большие пальцы лежали на кнопках.
+## Руки от первого лица. Кисти держат Game Boy за точки хвата на корпусе:
+## IK (TwoBoneIK3D) подтягивает плечо и локоть, HandAlign поворачивает кисть,
+## пальцы берутся из готовой позы модели, большие пальцы нажимают кнопки.
 
 const MODEL := preload("res://assets/hands/scene.gltf")
 const BASE_POSE := "Heart Pose"
 
-## Доворот костей поверх базовой позы, в градусах (X, Y, Z локальных осей кости).
-## Подобрано по снимкам: кисти повёрнуты ладонями к корпусу, пальцы уходят за него.
-@export var bone_offsets := {
-	"Forearm.L_03": Vector3(0, 20, 0),
-	"Hand.L_04": Vector3(40, -60, 0),
-	"Forearm.R_026": Vector3(0, -20, 0),
-	"Hand.R_027": Vector3(40, 60, 0),
-}
+## Хват левой руки в координатах Game Boy (метры и градусы). Правая — зеркально.
+@export var grip_position := Vector3(-0.095, -0.071, -0.029)
+@export var grip_rotation := Vector3(40.7, -161.5, 46.6)
+## Куда смотрит локоть левой руки, тоже в координатах Game Boy.
+@export var elbow_hint := Vector3(-0.3, -0.3, 0.05)
 ## Кожа темнее и грязнее, чем в исходной текстуре, под хоррор-свет.
 @export var skin_tint := Color(0.42, 0.4, 0.38)
 
-## Большой палец: поза покоя и поза нажатия, градусы для каждой из трёх фаланг.
-@export var thumb_rest := Vector3.ZERO
-@export var thumb_press := Vector3(0, 0, 18)
+## Сгиб остальных пальцев, чтобы они обхватывали корпус сзади (градусы на каждую фалангу).
+@export var finger_curl := Vector3(35, 0, 0)
 
+## Повороты фаланг большого пальца (градусы) для каждой кнопки. Посчитаны так,
+## чтобы кончик пальца попадал в кнопку: покой — над крестовиной и между A и B.
+## Для правой руки углы те же, отзеркаленные.
+const THUMB_LEFT := {
+	"rest": Vector3(14.4, 40.8, -20.5),
+	"gb_up": Vector3(21.6, 45.0, -16.7),
+	"gb_down": Vector3(16.3, 52.1, -31.9),
+	"gb_left": Vector3(28.5, 49.7, -31.1),
+	"gb_right": Vector3(10.9, 42.8, -15.8),
+}
+const THUMB_RIGHT := {
+	"rest": Vector3(10.6, 35.5, -15.8),
+	"gb_a": Vector3(26.8, 49.5, -22.7),
+	"gb_b": Vector3(7.7, 40.7, -14.6),
+}
+
+const ARM_L := ["Shoulder_2.L_02", "Forearm.L_03", "Hand.L_04"]
+const ARM_R := ["Shoulder_2.R_025", "Forearm.R_026", "Hand.R_027"]
 const THUMB_L := ["Finger_5.1.L_021", "Finger_5.2.L_022", "Finger_5.3.L_023"]
 const THUMB_R := ["Finger_5.1.R_044", "Finger_5.2.R_045", "Finger_5.3.R_046"]
 const PRESS_SPEED := 25.0
-## Какие кнопки нажимает каждый большой палец.
-const LEFT_ACTIONS := ["gb_up", "gb_down", "gb_left", "gb_right"]
-const RIGHT_ACTIONS := ["gb_a", "gb_b"]
 
 var skeleton: Skeleton3D
 var _base: Dictionary[int, Quaternion] = {}
-var _press_left := 0.0
-var _press_right := 0.0
+var _thumb_left: Vector3 = THUMB_LEFT["rest"]
+var _thumb_right: Vector3 = THUMB_RIGHT["rest"]
 
 
 func _ready() -> void:
@@ -42,7 +54,67 @@ func _ready() -> void:
 	player.play(BASE_POSE)
 	player.seek(0.0, true)
 	player.stop(true)
-	_apply_offsets()
+	_curl_fingers()
+	for bone_name: String in THUMB_L + THUMB_R:
+		var bone := skeleton.find_bone(bone_name)
+		_base[bone] = skeleton.get_bone_pose_rotation(bone)
+	_darken_skin(model)
+
+
+## Пальцы 1–4 (кроме большого), три фаланги на каждом, обе руки.
+func _curl_fingers() -> void:
+	for bone in skeleton.get_bone_count():
+		var bone_name := skeleton.get_bone_name(bone)
+		if not bone_name.begins_with("Finger_") or bone_name.begins_with("Finger_5") or bone_name.contains("_end"):
+			continue
+		if bone_name.contains(".4."):
+			continue
+		var side := 1.0 if bone_name.contains(".L") else -1.0
+		var euler := finger_curl * Vector3(1.0, side, side) * (PI / 180.0)
+		skeleton.set_bone_pose_rotation(bone, skeleton.get_bone_pose_rotation(bone) * Quaternion.from_euler(euler))
+
+
+## Привязывает руки к Game Boy: создаёт на нём цели хвата и подключает IK.
+func hold(gameboy: Node3D) -> void:
+	var targets: Array[Node3D] = []
+	var poles: Array[Node3D] = []
+	for side: float in [1.0, -1.0]:
+		var mirror := Vector3(side, 1.0, 1.0)
+		var target := Marker3D.new()
+		target.position = grip_position * mirror
+		var euler := grip_rotation * Vector3(1.0, side, side) * (PI / 180.0)
+		target.basis = Basis.from_euler(euler)
+		gameboy.add_child(target)
+		targets.append(target)
+		var pole := Marker3D.new()
+		pole.position = elbow_hint * mirror
+		gameboy.add_child(pole)
+		poles.append(pole)
+
+	var ik := TwoBoneIK3D.new()
+	skeleton.add_child(ik)
+	ik.setting_count = 2
+	for i in 2:
+		var arm: Array = ARM_L if i == 0 else ARM_R
+		ik.set_root_bone_name(i, arm[0])
+		ik.set_middle_bone_name(i, arm[1])
+		ik.set_end_bone_name(i, arm[2])
+		ik.set_target_node(i, ik.get_path_to(targets[i]))
+		ik.set_pole_node(i, ik.get_path_to(poles[i]))
+
+	var align := HandAlign.new()
+	for i in 2:
+		var arm: Array = ARM_L if i == 0 else ARM_R
+		align.pairs.append({"bone": skeleton.find_bone(arm[2]), "target": targets[i]})
+	skeleton.add_child(align)
+
+
+## Точка между плечами — от неё ставим руки относительно камеры.
+func shoulders() -> Vector3:
+	return skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone("Shoulder.L_00")).origin
+
+
+func _darken_skin(model: Node3D) -> void:
 	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D"):
 		var material := mesh.get_active_material(0)
 		if material is BaseMaterial3D:
@@ -56,51 +128,25 @@ func _ready() -> void:
 			mesh.material_override = material
 
 
-## Запоминаем позу после доворотов: от неё считаем нажатия.
-func _apply_offsets() -> void:
-	for bone_name: String in bone_offsets:
-		var bone := skeleton.find_bone(bone_name)
-		var euler: Vector3 = bone_offsets[bone_name] * (PI / 180.0)
-		var rotation := skeleton.get_bone_pose_rotation(bone) * Quaternion.from_euler(euler)
-		skeleton.set_bone_pose_rotation(bone, rotation)
-	for bone_name: String in THUMB_L + THUMB_R:
-		var bone := skeleton.find_bone(bone_name)
-		_base[bone] = skeleton.get_bone_pose_rotation(bone)
-
-
-## Точка между плечами — от неё считаем положение глаз.
-func shoulders() -> Vector3:
-	return skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone("Shoulder.L_00")).origin
-
-
-## Кончики больших пальцев в мировых координатах.
-func thumb_tips() -> Dictionary:
-	return {
-		"left": skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone("Finger_5.3.L_end_051")).origin,
-		"right": skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone("Finger_5.3.R_end_056")).origin,
-	}
-
-
 func _process(delta: float) -> void:
 	var blend := 1.0 - exp(-PRESS_SPEED * delta)
-	_press_left = lerpf(_press_left, 1.0 if _any_pressed(LEFT_ACTIONS) else 0.0, blend)
-	_press_right = lerpf(_press_right, 1.0 if _any_pressed(RIGHT_ACTIONS) else 0.0, blend)
-	_pose_thumb(THUMB_L, _press_left, 1.0)
-	_pose_thumb(THUMB_R, _press_right, -1.0)
+	_thumb_left = _thumb_left.lerp(_thumb_target(THUMB_LEFT), blend)
+	_thumb_right = _thumb_right.lerp(_thumb_target(THUMB_RIGHT), blend)
+	_pose_thumb(THUMB_L, _thumb_left, 1.0)
+	_pose_thumb(THUMB_R, _thumb_right, -1.0)
 
 
-func _any_pressed(actions: Array) -> bool:
-	for action: String in actions:
-		if Input.is_action_pressed(action):
-			return true
-	return false
+## Поза пальца для первой зажатой кнопки или поза покоя.
+func _thumb_target(poses: Dictionary) -> Vector3:
+	for action: String in poses:
+		if action != "rest" and Input.is_action_pressed(action):
+			return poses[action]
+	return poses["rest"]
 
 
 ## side зеркалит повороты для правой руки.
-func _pose_thumb(bones: Array, press: float, side: float) -> void:
-	var euler := thumb_rest.lerp(thumb_press, press) * (PI / 180.0)
-	euler.y *= side
-	euler.z *= side
+func _pose_thumb(bones: Array, degrees: Vector3, side: float) -> void:
+	var euler := degrees * Vector3(1.0, side, side) * (PI / 180.0)
 	for bone_name: String in bones:
 		var bone := skeleton.find_bone(bone_name)
 		skeleton.set_bone_pose_rotation(bone, _base[bone] * Quaternion.from_euler(euler))
