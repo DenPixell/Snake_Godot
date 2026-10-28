@@ -4,3 +4,6 @@
 
 # Сборки
 /build/
+
+# macOS
+.DS_Store
