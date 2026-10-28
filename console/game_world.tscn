@@ -1,11 +1,10 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://console/game_world.gd" id="1_world"]
 [ext_resource type="Script" path="res://console/gameboy.gd" id="2_gameboy"]
 [ext_resource type="PackedScene" path="res://screen/handheld.tscn" id="3_handheld"]
 [ext_resource type="Script" path="res://console/candle_light.gd" id="4_candle"]
-[ext_resource type="Script" path="res://console/hands.gd" id="5_hands"]
-[ext_resource type="Script" path="res://console/player_camera.gd" id="6_camera"]
+[ext_resource type="PackedScene" path="res://console/hold_pose.tscn" id="5_pose"]
 
 [sub_resource type="Environment" id="Environment_dark"]
 background_mode = 1
@@ -34,17 +33,10 @@ render_target_update_mode = 4
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_dark")
 
-[node name="Hands" type="Node3D" parent="."]
-transform = Transform3D(0.325, 0, 0, 0, 0.325, 0, 0, 0, 0.325, 0, 0, 0)
-script = ExtResource("5_hands")
+[node name="HoldPose" parent="." instance=ExtResource("5_pose")]
 
 [node name="GameBoy" type="Node3D" parent="."]
 script = ExtResource("2_gameboy")
-
-[node name="Camera3D" type="Camera3D" parent="."]
-fov = 45.0
-near = 0.01
-script = ExtResource("6_camera")
 
 [node name="Candle" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 1.3, -0.3)

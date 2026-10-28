@@ -68,10 +68,20 @@ func _prepare_mesh(mesh: MeshInstance3D, screen_texture: Texture2D) -> void:
 		_rest[_dpad] = _dpad.transform
 
 
-## Точка между крестовиной и кнопками A/B — сюда целятся большие пальцы.
-func thumbs_target() -> Dictionary:
-	var ab: Vector3 = (_buttons["gb_a"].global_position + _buttons["gb_b"].global_position) * 0.5
-	return {"left": _dpad.global_position, "right": ab}
+## Куда должен встать палец для каждой кнопки, в координатах самого Game Boy.
+## Нужно инструменту tools/thumb_poses.gd.
+func button_positions() -> Dictionary:
+	var to_local := global_transform.affine_inverse()
+	var dpad := to_local * _dpad.global_position
+	var arm := Vector3(0.0075, 0.0, 0.0)
+	return {
+		"gb_up": dpad + Vector3(0, arm.x, 0),
+		"gb_down": dpad - Vector3(0, arm.x, 0),
+		"gb_left": dpad - arm,
+		"gb_right": dpad + arm,
+		"gb_a": to_local * _buttons["gb_a"].global_position,
+		"gb_b": to_local * _buttons["gb_b"].global_position,
+	}
 
 
 func _is_dpad(p: Vector3) -> bool:

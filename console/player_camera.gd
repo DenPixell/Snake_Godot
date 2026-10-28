@@ -15,13 +15,9 @@ var _look := Vector2.ZERO
 var _time := 0.0
 
 
-## Положение, вокруг которого камера «дышит» и поворачивается мышью.
-func set_base(base: Transform3D) -> void:
-	_base = base
-	global_transform = base
-
-
 func _ready() -> void:
+	# Положение из сцены — вокруг него камера «дышит» и поворачивается мышью.
+	_base = global_transform
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
