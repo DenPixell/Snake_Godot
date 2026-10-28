@@ -35,5 +35,5 @@ docs/      требования и план
 ## Тесты
 
 ```bash
-/Applications/Godot.app/Contents/MacOS/Godot --headless --path . -s tests/run_tests.gd
+tests/run.sh
 ```
