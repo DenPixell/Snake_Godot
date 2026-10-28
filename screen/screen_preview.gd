@@ -1,7 +1,7 @@
 extends Control
 ## Экран Game Boy в обычном окне, без 3D. Нужен, чтобы проверять геймплей отдельно.
 
-const GAME_SCREEN := preload("res://screen/game_screen.tscn")
+const HANDHELD := preload("res://screen/handheld.tscn")
 const LCD_SHADER := preload("res://screen/lcd_preview.gdshader")
 
 
@@ -12,9 +12,7 @@ func _ready() -> void:
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	add_child(viewport)
 
-	var screen: GameScreen = GAME_SCREEN.instantiate()
-	viewport.add_child(screen)
-	screen.start(Difficulty.Level.NORMAL)
+	viewport.add_child(HANDHELD.instantiate())
 
 	var material := ShaderMaterial.new()
 	material.shader = LCD_SHADER

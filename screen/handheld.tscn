@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://screen/handheld.gd" id="1_handheld"]
+[ext_resource type="PackedScene" path="res://screen/game_screen.tscn" id="2_game"]
+
+[node name="Handheld" type="Node2D"]
+script = ExtResource("1_handheld")
+
+[node name="GameScreen" parent="." instance=ExtResource("2_game")]
+
+[node name="MenuLayer" type="Node2D" parent="."]

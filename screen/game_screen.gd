@@ -1,11 +1,12 @@
 class_name GameScreen
 extends Node2D
-## Экран Game Boy во время партии: поле, счёт, эффекты, пауза, Game Over.
+## Экран Game Boy во время партии: поле, счёт, эффекты, пауза.
 ## Рисует в «каналы» (см. PixelArt), цвета ЖК добавляет шейдер.
+## Без партии рисует только напечатанные на стекле элементы и пустое поле — поверх него меню.
 
 signal finished(score: int, won: bool)
 
-enum Mode { COUNTDOWN, PLAYING, PAUSED, DYING, OVER }
+enum Mode { IDLE, COUNTDOWN, PLAYING, PAUSED, DYING }
 
 const SIZE := Vector2i(160, 176)
 const CELL := 6
@@ -25,7 +26,7 @@ const EFFECT_SLOTS := [
 ]
 
 var game: SnakeGame
-var mode := Mode.COUNTDOWN
+var mode := Mode.IDLE
 var _timer := 0.0
 
 @onready var _blind: ColorRect = $Blind
@@ -46,7 +47,14 @@ func start(level: Difficulty.Level) -> void:
 	_start_countdown()
 
 
+func stop() -> void:
+	game = null
+	mode = Mode.IDLE
+	_blind.visible = false
+
+
 func _process(delta: float) -> void:
+	queue_redraw()
 	if game == null:
 		return
 	_handle_input()
@@ -60,10 +68,9 @@ func _process(delta: float) -> void:
 		Mode.DYING:
 			_timer -= delta
 			if _timer <= 0.0:
-				mode = Mode.OVER
 				finished.emit(game.score, false)
+				return
 	_update_blind()
-	queue_redraw()
 
 
 func _handle_input() -> void:
@@ -77,9 +84,6 @@ func _handle_input() -> void:
 		Mode.PAUSED:
 			if Input.is_action_just_pressed("gb_b"):
 				_start_countdown()
-		Mode.OVER:
-			if Input.is_action_just_pressed("gb_a"):
-				start(game.level)
 
 
 func _direction_of(action: String) -> Vector2i:
@@ -104,7 +108,6 @@ func _on_died() -> void:
 
 
 func _on_won() -> void:
-	mode = Mode.OVER
 	finished.emit(game.score, true)
 
 
@@ -118,15 +121,13 @@ func _update_blind() -> void:
 
 
 func _draw() -> void:
-	if game == null:
-		return
 	_draw_hud()
 	match mode:
+		Mode.IDLE:
+			draw_rect(Rect2(FIELD_ORIGIN, FIELD_SIZE), PixelArt.MATRIX)
 		Mode.PAUSED:
-			_draw_message(["PAUSE", "", "B - PLAY"])
-		Mode.OVER:
-			var title := "YOU WIN" if game.state == SnakeGame.State.WON else "GAME OVER"
-			_draw_message([title, "", "SCORE %d" % game.score, "", "A - RETRY"])
+			draw_rect(Rect2(FIELD_ORIGIN, FIELD_SIZE), PixelArt.MATRIX)
+			draw_lines(self, ["PAUSE", "", "B - PLAY"])
 		_:
 			_draw_field()
 			if mode == Mode.COUNTDOWN:
@@ -135,7 +136,8 @@ func _draw() -> void:
 
 func _draw_hud() -> void:
 	PixelArt.draw_text(self, "SCORE", Vector2i(FIELD_ORIGIN.x, 6))
-	PixelArt.draw_number(self, game.score, 4, Vector2i(FIELD_ORIGIN.x + FIELD_SIZE.x - 26, 5))
+	var score := game.score if game != null else 0
+	PixelArt.draw_number(self, score, 4, Vector2i(FIELD_ORIGIN.x + FIELD_SIZE.x - 26, 5), game != null)
 	# Рамка поля напечатана на стекле и горит всегда.
 	draw_rect(Rect2(FIELD_ORIGIN - Vector2i.ONE, FIELD_SIZE + Vector2i(2, 2)), PixelArt.INK, false, 1.0)
 	for slot: Dictionary in EFFECT_SLOTS:
@@ -147,7 +149,7 @@ func _draw_effect_slot(slot: Dictionary) -> void:
 	var icon_width: int = icon[0].length()
 	var y: int = slot["y"]
 	var icon_origin := Vector2i(16 - icon_width / 2, y)
-	var left := game.effects.time_left(slot["kind"])
+	var left := game.effects.time_left(slot["kind"]) if game != null else 0.0
 	# В последние полторы секунды значок мигает, предупреждая о конце эффекта.
 	var blink_off := left < 1.5 and fmod(Time.get_ticks_msec() / 1000.0, 0.3) < 0.15
 	var lit := left > 0.0 and not blink_off
@@ -224,14 +226,13 @@ func _draw_countdown() -> void:
 	PixelArt.draw_text(self, text, Vector2i(box.position) + Vector2i(5, 4))
 
 
-## Текст по центру поля, построчно.
-func _draw_message(lines: Array) -> void:
-	draw_rect(Rect2(FIELD_ORIGIN, FIELD_SIZE), PixelArt.MATRIX)
+## Текст по центру поля, построчно. Нужен и экрану игры, и меню.
+static func draw_lines(canvas: CanvasItem, lines: Array, center_y := FIELD_ORIGIN.y + FIELD_SIZE.y / 2) -> void:
 	var line_height := PixelArt.GLYPH_HEIGHT + 4
-	var y := FIELD_ORIGIN.y + FIELD_SIZE.y / 2 - lines.size() * line_height / 2
+	var y: int = center_y - lines.size() * line_height / 2
 	for line: String in lines:
 		var x := FIELD_ORIGIN.x + (FIELD_SIZE.x - PixelArt.text_width(line)) / 2
-		PixelArt.draw_text(self, line, Vector2i(x, y))
+		PixelArt.draw_text(canvas, line, Vector2i(x, y))
 		y += line_height
 
 

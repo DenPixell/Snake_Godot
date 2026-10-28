@@ -54,6 +54,7 @@ const FONT := {
 	":": [".....", ".##..", ".##..", ".....", ".##..", ".##..", "....."],
 	"_": [".....", ".....", ".....", ".....", ".....", ".....", "#####"],
 	">": ["#....", "##...", "###..", "####.", "###..", "##...", "#...."],
+	"<": ["...#.", "..##.", ".###.", "####.", ".###.", "..##.", "...#."],
 }
 const GLYPH_WIDTH := 5
 const GLYPH_HEIGHT := 7
@@ -132,25 +133,28 @@ const SEGMENT_WIDTH := 5
 const SEGMENT_HEIGHT := 9
 
 
-static func draw_pattern(canvas: CanvasItem, pattern: Array, origin: Vector2i, color: Color) -> void:
+## scale — во сколько раз увеличить каждый пиксель узора.
+static func draw_pattern(canvas: CanvasItem, pattern: Array, origin: Vector2i, color: Color,
+		scale := 1) -> void:
 	for y in pattern.size():
 		var row: String = pattern[y]
 		for x in row.length():
 			if row[x] == "#":
-				canvas.draw_rect(Rect2(origin + Vector2i(x, y), Vector2.ONE), color)
+				canvas.draw_rect(Rect2(origin + Vector2i(x, y) * scale, Vector2.ONE * scale), color)
 
 
 ## Строка шрифтом 5 × 7 с промежутком в 1 пиксель.
-static func draw_text(canvas: CanvasItem, text: String, origin: Vector2i, color := INK) -> void:
+static func draw_text(canvas: CanvasItem, text: String, origin: Vector2i, color := INK,
+		scale := 1) -> void:
 	var x := origin.x
 	for ch in text.to_upper():
 		if FONT.has(ch):
-			draw_pattern(canvas, FONT[ch], Vector2i(x, origin.y), color)
-		x += GLYPH_WIDTH + 1
+			draw_pattern(canvas, FONT[ch], Vector2i(x, origin.y), color, scale)
+		x += (GLYPH_WIDTH + 1) * scale
 
 
-static func text_width(text: String) -> int:
-	return maxi(text.length() * (GLYPH_WIDTH + 1) - 1, 0)
+static func text_width(text: String, scale := 1) -> int:
+	return maxi(text.length() * (GLYPH_WIDTH + 1) - 1, 0) * scale
 
 
 static func draw_tiny(canvas: CanvasItem, text: String, origin: Vector2i, color := INK) -> void:
