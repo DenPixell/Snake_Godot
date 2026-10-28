@@ -1,0 +1,64 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://console/game_world.gd" id="1_world"]
+[ext_resource type="Script" path="res://console/gameboy.gd" id="2_gameboy"]
+[ext_resource type="PackedScene" path="res://screen/handheld.tscn" id="3_handheld"]
+[ext_resource type="Script" path="res://console/candle_light.gd" id="4_candle"]
+[ext_resource type="Script" path="res://console/hands.gd" id="5_hands"]
+[ext_resource type="Script" path="res://console/player_camera.gd" id="6_camera"]
+
+[sub_resource type="Environment" id="Environment_dark"]
+background_mode = 1
+background_color = Color(0.005, 0.005, 0.008, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.05, 0.05, 0.07, 1)
+ambient_light_energy = 0.15
+tonemap_mode = 3
+glow_enabled = true
+glow_intensity = 0.6
+glow_bloom = 0.05
+fog_enabled = true
+fog_light_color = Color(0.02, 0.02, 0.025, 1)
+fog_density = 0.6
+
+[node name="GameWorld" type="Node3D"]
+script = ExtResource("1_world")
+
+[node name="ScreenViewport" type="SubViewport" parent="."]
+disable_3d = true
+size = Vector2i(160, 144)
+render_target_update_mode = 4
+
+[node name="Handheld" parent="ScreenViewport" instance=ExtResource("3_handheld")]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_dark")
+
+[node name="Rig" type="Node3D" parent="."]
+
+[node name="Hands" type="Node3D" parent="Rig"]
+transform = Transform3D(0.325, 0, 0, 0, 0.325, 0, 0, 0, 0.325, 0, 0, 0)
+script = ExtResource("5_hands")
+
+[node name="GameBoy" type="Node3D" parent="Rig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, -0.24)
+script = ExtResource("2_gameboy")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+fov = 55.0
+near = 0.01
+script = ExtResource("6_camera")
+
+[node name="Candle" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 1.25, -0.1)
+light_color = Color(1, 0.72, 0.45, 1)
+light_energy = 0.35
+omni_range = 1.5
+shadow_enabled = true
+script = ExtResource("4_candle")
+
+[node name="ScreenGlow" type="OmniLight3D" parent="Rig/GameBoy"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0.03)
+light_color = Color(0.6, 0.75, 0.25, 1)
+light_energy = 0.03
+omni_range = 0.2
