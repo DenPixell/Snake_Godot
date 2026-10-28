@@ -1,31 +1,30 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3 uid="uid://b6mfvnf6jky0q"]
 
-[ext_resource type="PackedScene" path="res://assets/gameboy/scene.gltf" id="1_gameboy"]
-[ext_resource type="PackedScene" path="res://assets/hands/scene.gltf" id="2_hands"]
-[ext_resource type="Script" path="res://console/hands.gd" id="3_hands"]
-[ext_resource type="Script" path="res://console/player_camera.gd" id="4_camera"]
+[ext_resource type="PackedScene" uid="uid://dyvtvra1nv0yu" path="res://assets/gameboy/scene.gltf" id="1_gameboy"]
+[ext_resource type="PackedScene" uid="uid://ccuexu4dtl1rv" path="res://assets/hands/scene.gltf" id="2_hands"]
+[ext_resource type="Script" uid="uid://doqmhcutl5tfm" path="res://console/hands.gd" id="3_hands"]
+[ext_resource type="Script" uid="uid://cgouqxrhkprv7" path="res://console/player_camera.gd" id="4_camera"]
 
-[node name="HoldPose" type="Node3D"]
+[node name="HoldPose" type="Node3D" unique_id=2059028726]
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=2087384506]
 transform = Transform3D(1, 0, 0, 0, 0.882948, 0.469472, 0, -0.469472, 0.882948, 0, 1.5, 0)
 current = true
-fov = 45
+fov = 45.0
 near = 0.01
 script = ExtResource("4_camera")
 
-[node name="GameBoyAnchor" type="Marker3D" parent="."]
+[node name="GameBoyAnchor" type="Marker3D" parent="." unique_id=2058043469]
 transform = Transform3D(1, 0, 0, 0, 0.882948, 0.469472, 0, -0.469472, 0.882948, 0, 1.38143, -0.197444)
 
-[node name="Preview" parent="GameBoyAnchor" instance=ExtResource("1_gameboy")]
-transform = Transform3D(0.000262237762, 0, 0, 0, 0.000262237762, 0, 0, 0, 0.000262237762, 0, 0, 0)
+[node name="Preview" parent="GameBoyAnchor" unique_id=2035285520 instance=ExtResource("1_gameboy")]
+transform = Transform3D(0.00026223777, 0, 0, 0, 0.00026223777, 0, 0, 0, 0.00026223777, 0, 0, 0)
 
-[node name="Hands" parent="." instance=ExtResource("2_hands")]
+[node name="Hands" parent="." unique_id=1688579111 instance=ExtResource("2_hands")]
 transform = Transform3D(0.325, 0, 0, 0, 0.325, 0, 0, 0, 0.325, 0, 0.0238618, -0.0299999)
 script = ExtResource("3_hands")
 
-[node name="Skeleton3D" parent="Hands/Sketchfab_model/b9d253e65c3141c98d83839264b01f04_fbx/Object_2/RootNode/[FPS Female Arms] RIG/Object_5" index="0"]
-bones/0/rotation = Quaternion(0, 0, 0, 1)
+[node name="Skeleton3D" parent="Hands/Sketchfab_model/b9d253e65c3141c98d83839264b01f04_fbx/Object_2/RootNode/[FPS Female Arms] RIG/Object_5" parent_id_path=PackedInt32Array(1688579111, 923707740) index="0" unique_id=1745527490]
 bones/1/rotation = Quaternion(0.707107, 0, 0, 0.707107)
 bones/2/rotation = Quaternion(0.0487427, -0.0426532, 0.75097, 0.657153)
 bones/3/rotation = Quaternion(-0.350402, 0.0484773, 0.336564, 0.872693)
