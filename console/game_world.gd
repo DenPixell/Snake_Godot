@@ -31,6 +31,9 @@ var _hands_rest: Transform3D
 @onready var _pause := PauseMenu.new()
 @onready var _settings := SettingsMenu.new()
 @onready var _tutorial := TutorialMenu.new()
+@onready var _secret := SecretMenu.new()
+@onready var _glow: OmniLight3D = $GameBoy/ScreenGlow
+@onready var _glow_color: Color = _glow.light_color
 
 
 func _ready() -> void:
@@ -44,9 +47,15 @@ func _ready() -> void:
 	_menu.play_pressed.connect(_start_game)
 	_menu.settings_pressed.connect(_open_settings)
 	_menu.tutorial_pressed.connect(_open_tutorial)
+	_menu.secret_pressed.connect(_open_secret)
+	_handheld.konami_entered.connect(_toggle_cheat)
+	_handheld.cheat_expired.connect(_toggle_cheat)
 	$UI.add_child(_pause)
 	$UI.add_child(_settings)
 	$UI.add_child(_tutorial)
+	$UI.add_child(_secret)
+	_secret.visible = false
+	_secret.closed.connect(_show_main_menu)
 	_pause.visible = false
 	_settings.visible = false
 	_tutorial.visible = false
@@ -108,6 +117,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_settings.close()
 	elif _tutorial.visible:
 		_tutorial.close()
+	elif _secret.visible:
+		_secret.close()
 	elif state == State.PLAYING:
 		_pause_game()
 	elif state == State.PAUSED:
@@ -149,6 +160,30 @@ func _open_tutorial() -> void:
 	_menu.visible = false
 	_menu_view.visible = false
 	_tutorial.visible = true
+
+
+func _open_secret() -> void:
+	_menu.visible = false
+	_menu_view.visible = false
+	_secret.visible = true
+
+
+## Код Конами включает или выключает неуязвимость и радужный экран.
+## Через 2 минуты партии чит выключается сам — тот же вызов.
+func _toggle_cheat() -> void:
+	Settings.cheat_enabled = not Settings.cheat_enabled
+	_gameboy.set_rainbow(Settings.cheat_enabled)
+	if not Settings.cheat_enabled:
+		_glow.light_color = _glow_color
+	# secret_found сохраняется в файл, поэтому кнопка останется и после перезапуска.
+	Settings.set_value("secret_found", true)
+
+
+## Отсвет экрана на руках тоже переливается, пока включён чит.
+func _process(_delta: float) -> void:
+	if Settings.cheat_enabled:
+		var hue := fmod(Time.get_ticks_msec() / 2800.0, 1.0)
+		_glow.light_color = Color.from_hsv(hue, 0.6, 1.0)
 
 
 func _show_main_menu() -> void:

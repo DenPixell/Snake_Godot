@@ -30,6 +30,10 @@ var resolution := Vector2i(1920, 1080)
 var fullscreen := false
 var vsync := true
 var bindings: Dictionary = DEFAULT_BINDINGS.duplicate()
+## Код Конами хоть раз введён — в главном меню появляется кнопка с поздравлением.
+var secret_found := false
+## Чит включён: неуязвимость и радужный экран. Не сохраняется — после перезапуска выключен.
+var cheat_enabled := false
 
 
 func _ready() -> void:
@@ -123,6 +127,7 @@ func _load() -> void:
 	resolution = file.get_value("display", "resolution", resolution)
 	fullscreen = file.get_value("display", "fullscreen", fullscreen)
 	vsync = file.get_value("display", "vsync", vsync)
+	secret_found = file.get_value("game", "secret_found", secret_found)
 	for action: String in DEFAULT_BINDINGS:
 		var text: String = file.get_value("input", action, DEFAULT_BINDINGS[action])
 		bindings[action] = text if InputBinding.from_text(text) != null else DEFAULT_BINDINGS[action]
@@ -133,6 +138,7 @@ func _save() -> void:
 	file.set_value("audio", "music", music_volume)
 	file.set_value("audio", "effects", effects_volume)
 	file.set_value("game", "language", language)
+	file.set_value("game", "secret_found", secret_found)
 	file.set_value("display", "resolution", resolution)
 	file.set_value("display", "fullscreen", fullscreen)
 	file.set_value("display", "vsync", vsync)

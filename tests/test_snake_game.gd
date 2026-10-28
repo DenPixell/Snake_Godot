@@ -158,3 +158,48 @@ func _steer_to_item(game: SnakeGame) -> void:
 	if game.effects.is_active(Effects.Kind.INVERT):
 		dir = -dir
 	game.turn(dir)
+
+
+func test_invincible_wraps_through_wall() -> void:
+	var game := make_game()
+	game.invincible_left = 120.0
+	game.item = null
+	for i in Board.HEIGHT:
+		game.step()
+	check_eq(game.state, SnakeGame.State.PLAYING, "не умерла о стену")
+	check(game.board.in_bounds(game.head()), "голова на поле")
+
+
+func test_invincible_passes_brick_and_self() -> void:
+	var game := make_game()
+	game.invincible_left = 120.0
+	game.item = null
+	game.board.add_brick(game.head() + Vector2i.UP)
+	game.step()
+	check_eq(game.state, SnakeGame.State.PLAYING, "сквозь кирпич")
+	game.body.append_array([game.head() + Vector2i(1, -1), game.head() + Vector2i(1, 0)])
+	game.body.insert(1, game.head() + Vector2i.UP)
+	game.step()
+	check_eq(game.state, SnakeGame.State.PLAYING, "сквозь себя")
+
+
+func test_invincibility_ends_after_time() -> void:
+	var game := make_game()
+	game.invincible_left = 1.0
+	game.item = null
+	var ended := [false]
+	game.invincibility_ended.connect(func() -> void: ended[0] = true)
+	game.tick(0.5)
+	check(game.is_invincible(), "ещё действует")
+	game.tick(0.6)
+	check(not game.is_invincible(), "закончилась")
+	check(ended[0], "сигнал об окончании")
+
+
+func test_invincibility_waits_until_snake_is_free() -> void:
+	var game := make_game()
+	game.invincible_left = 0.05
+	game.item = null
+	game.board.add_brick(game.body[1])
+	game._tick_invincibility(0.1)
+	check(game.is_invincible(), "пока на кирпиче — не заканчивается")

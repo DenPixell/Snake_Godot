@@ -10,6 +10,7 @@ const TEST_FILES: Array[String] = [
 	"res://tests/test_leaderboard.gd",
 	"res://tests/test_settings.gd",
 	"res://tests/test_synth.gd",
+	"res://tests/test_konami.gd",
 ]
 
 

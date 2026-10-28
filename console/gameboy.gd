@@ -93,6 +93,11 @@ func play_sound(sound: String) -> void:
 	_speaker.play()
 
 
+## Радужная подсветка экрана — чит по коду Конами.
+func set_rainbow(on: bool) -> void:
+	_screen_material.set_shader_parameter("rainbow", 1.0 if on else 0.0)
+
+
 func set_screen_on(on: bool) -> void:
 	_screen_material.set_shader_parameter("brightness", SCREEN_ON if on else SCREEN_OFF)
 

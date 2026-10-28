@@ -44,7 +44,7 @@ void fragment() {
 	float facing = clamp(dot(NORMAL, VIEW), 0.0, 1.0);
 	float glint = pow(1.0 - facing, 2.0) * 0.6;
 
-	vec3 color = lcd_color(screen_data, uv, glint) * brightness;
+	vec3 color = lcd_color(screen_data, uv, glint, TIME) * brightness;
 	color += vec3(0.08, 0.09, 0.05) * scratches(uv) * scratch_amount;
 	ALBEDO = color;
 }

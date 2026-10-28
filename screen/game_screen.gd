@@ -7,6 +7,7 @@ extends Node2D
 signal finished(score: int, won: bool)
 ## Звук, который должен проиграть динамик Game Boy (имена — в audio/sounds.gd).
 signal beep(sound: String)
+signal invincibility_ended
 
 enum Mode { IDLE, COUNTDOWN, PLAYING, PAUSED, DYING }
 
@@ -51,6 +52,7 @@ func start(level: Difficulty.Level) -> void:
 	game.died.connect(_on_died)
 	game.won.connect(_on_won)
 	game.item_eaten.connect(_on_item_eaten)
+	game.invincibility_ended.connect(_on_invincibility_ended)
 	_start_countdown()
 
 
@@ -130,6 +132,11 @@ func _on_died() -> void:
 func _on_won() -> void:
 	beep.emit("win")
 	finished.emit(game.score, true)
+
+
+func _on_invincibility_ended() -> void:
+	beep.emit("back")
+	invincibility_ended.emit()
 
 
 func _on_item_eaten(type: Item.Type) -> void:

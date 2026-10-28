@@ -7,6 +7,8 @@ signal item_eaten(type: Item.Type)
 signal brick_placed(cell: Vector2i)
 signal died
 signal won
+## Неуязвимость по коду Конами закончилась.
+signal invincibility_ended
 
 enum State { PLAYING, DEAD, WON }
 
@@ -29,6 +31,9 @@ var direction := Vector2i.UP
 var board := Board.new()
 var item: Item
 var effects := Effects.new()
+## Чит по коду Конами: сколько секунд ещё змейка проходит сквозь стены (выходит
+## с другой стороны), себя и кирпичи. Время идёт только во время партии.
+var invincible_left := 0.0
 
 var _rng: RandomNumberGenerator
 var _spawner: ItemSpawner
@@ -77,6 +82,7 @@ func tick(delta: float) -> void:
 	if state != State.PLAYING:
 		return
 	effects.tick(delta)
+	_tick_invincibility(delta)
 	_step_time += delta
 	while state == State.PLAYING and _step_time >= 1.0 / speed():
 		_step_time -= 1.0 / speed()
@@ -90,10 +96,14 @@ func step() -> void:
 	if not _turns.is_empty():
 		direction = _turns.pop_front()
 	var next := head() + direction
+	var invincible := is_invincible()
+	if invincible:
+		next = Vector2i(posmod(next.x, Board.WIDTH), posmod(next.y, Board.HEIGHT))
 	var growing := _grow_left > 0
 	# В клетку хвоста можно въехать, если хвост в этот же шаг уходит.
 	var hits_body: bool = body.has(next) and not (next == body.back() and not growing)
-	if not board.in_bounds(next) or board.is_brick(next) or hits_body:
+	var crashed := not board.in_bounds(next) or board.is_brick(next) or hits_body
+	if crashed and not invincible:
 		state = State.DEAD
 		died.emit()
 		return
@@ -104,6 +114,31 @@ func step() -> void:
 		body.pop_back()
 	if item != null and item.occupies(next):
 		_eat()
+
+
+func is_invincible() -> bool:
+	return invincible_left > 0.0
+
+
+## Неуязвимость не заканчивается, пока змейка внутри себя или кирпича —
+## иначе она погибла бы сразу, как только время вышло.
+func _tick_invincibility(delta: float) -> void:
+	if invincible_left <= 0.0:
+		return
+	invincible_left = maxf(invincible_left - delta, 0.0)
+	if invincible_left == 0.0 and _overlaps():
+		invincible_left = 0.01
+	if invincible_left == 0.0:
+		invincibility_ended.emit()
+
+
+func _overlaps() -> bool:
+	var seen := {}
+	for cell in body:
+		if seen.has(cell) or board.is_brick(cell):
+			return true
+		seen[cell] = true
+	return false
 
 
 ## Доля пройденного пути до следующей клетки, от 0 до 1. Нужна для плавной отрисовки.

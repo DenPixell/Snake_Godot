@@ -5,6 +5,13 @@ extends Node2D
 
 ## Звук, который должен проиграть динамик Game Boy (имена — в audio/sounds.gd).
 signal beep(sound: String)
+## Код Конами введён в меню Game Boy.
+signal konami_entered
+## Время чита вышло во время партии.
+signal cheat_expired
+
+## Сколько секунд партии действует чит по коду Конами.
+const CHEAT_SECONDS := 120.0
 
 enum Page { MAIN, DIFFICULTY, LEADERBOARD, GAME, NAME_ENTRY, GAME_OVER }
 
@@ -25,6 +32,9 @@ var _last_rank := -1
 ## Имя в рекордах: номера букв и какая сейчас выбрана.
 var _name_letters: Array[int] = [0, 0, 0]
 var _name_cursor := 0
+var _konami := KonamiCode.new()
+## Партия идёт с читом — её результат не попадает в рекорды.
+var _cheated := false
 
 @onready var _game: GameScreen = $GameScreen
 @onready var _menu_layer: Node2D = $MenuLayer
@@ -33,11 +43,20 @@ var _name_cursor := 0
 func _ready() -> void:
 	_game.finished.connect(_on_game_finished)
 	_game.beep.connect(beep.emit)
+	_game.invincibility_ended.connect(cheat_expired.emit)
 	# Меню рисуется отдельным узлом поверх экрана игры.
 	_menu_layer.draw.connect(_draw_menu)
 
 
 func _process(_delta: float) -> void:
+	# Код вводится только в меню: в игре стрелки и A управляют змейкой.
+	if page != Page.GAME:
+		for action: String in ["gb_up", "gb_down", "gb_left", "gb_right", "gb_a", "gb_b"]:
+			if Input.is_action_just_pressed(action) and _konami.feed(action):
+				beep.emit("win")
+				konami_entered.emit()
+				# Последнее нажатие кода не должно ещё и выбрать пункт меню.
+				return
 	if Input.is_action_just_pressed("gb_start") and page != Page.MAIN:
 		_game.stop()
 		_open(Page.MAIN)
@@ -109,6 +128,8 @@ func _on_level_selected(index: int) -> void:
 func _start_game() -> void:
 	page = Page.GAME
 	_game.start(_level)
+	_cheated = Settings.cheat_enabled
+	_game.game.invincible_left = CHEAT_SECONDS if _cheated else 0.0
 
 
 func _on_game_finished(score: int, won: bool) -> void:
@@ -118,7 +139,7 @@ func _on_game_finished(score: int, won: bool) -> void:
 	_last_rank = -1
 	if not won:
 		beep.emit("over")
-	if Records.qualifies(_level, score):
+	if not _cheated and Records.qualifies(_level, score):
 		_name_cursor = 0
 		_open(Page.NAME_ENTRY)
 	else:
