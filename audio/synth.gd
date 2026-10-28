@@ -50,17 +50,6 @@ static func noise(duration: float, volume := 0.3, smooth := 0.0, seed_value := 1
 	return out
 
 
-## Затухающий удар низкой частоты — стук, глухой удар.
-static func thump(hz: float, duration: float, volume := 0.5) -> PackedFloat32Array:
-	var count := int(duration * RATE)
-	var out := PackedFloat32Array()
-	out.resize(count)
-	for i in count:
-		var t := float(i) / RATE
-		out[i] = sin(TAU * hz * t * (1.0 - t * 0.5)) * volume * exp(-t * 18.0)
-	return out
-
-
 ## Звуки друг за другом.
 static func chain(parts: Array) -> PackedFloat32Array:
 	var out := PackedFloat32Array()
