@@ -9,7 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://byshf3b8u1jh5" path="res://assets/room/ArmChair_01/ArmChair_01.gltf" id="7_chair"]
 [ext_resource type="PackedScene" uid="uid://vq1jkk5togtu" path="res://assets/room/brass_candleholders/brass_candleholders.gltf" id="8_candles"]
 [ext_resource type="Script" uid="uid://bic0ii1rdyf21" path="res://menu/title.gd" id="9_title"]
-[ext_resource type="PackedScene" path="res://menu/main_menu.tscn" id="10_menu"]
+[ext_resource type="PackedScene" uid="uid://bqth5jmb8rqrq" path="res://menu/main_menu.tscn" id="10_menu"]
 
 [sub_resource type="Environment" id="Environment_dark"]
 background_mode = 1
