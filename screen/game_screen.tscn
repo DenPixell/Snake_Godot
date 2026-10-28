@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://screen/game_screen.gd" id="1_screen"]
+[ext_resource type="Shader" path="res://screen/blind.gdshader" id="2_blind"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_blind"]
+shader = ExtResource("2_blind")
+
+[node name="GameScreen" type="Node2D"]
+script = ExtResource("1_screen")
+
+[node name="Blind" type="ColorRect" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_blind")
+mouse_filter = 2
