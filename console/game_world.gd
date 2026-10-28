@@ -30,6 +30,7 @@ var _hands_rest: Transform3D
 @onready var _menu: MainMenu = $UI/MainMenu
 @onready var _pause := PauseMenu.new()
 @onready var _settings := SettingsMenu.new()
+@onready var _tutorial := TutorialMenu.new()
 
 
 func _ready() -> void:
@@ -42,10 +43,17 @@ func _ready() -> void:
 			menu_camera_target - menu_camera_position).translated(menu_camera_position)
 	_menu.play_pressed.connect(_start_game)
 	_menu.settings_pressed.connect(_open_settings)
+	_menu.tutorial_pressed.connect(_open_tutorial)
 	$UI.add_child(_pause)
 	$UI.add_child(_settings)
+	$UI.add_child(_tutorial)
 	_pause.visible = false
 	_settings.visible = false
+	_tutorial.visible = false
+	_tutorial.closed.connect(_show_main_menu)
+	# Заставка про наушники — поверх всего, только при запуске игры.
+	var splash := Splash.new()
+	$UI.add_child(splash)
 	_pause.continue_pressed.connect(_resume)
 	_pause.settings_pressed.connect(_open_settings)
 	_pause.main_menu_pressed.connect(_back_to_main_menu)
@@ -100,6 +108,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if _settings.visible:
 		_settings.close()
+	elif _tutorial.visible:
+		_tutorial.close()
 	elif state == State.PLAYING:
 		_pause_game()
 	elif state == State.PAUSED:
@@ -137,10 +147,20 @@ func _open_settings() -> void:
 	_settings.visible = true
 
 
+func _open_tutorial() -> void:
+	_menu.visible = false
+	_menu_view.visible = false
+	_tutorial.visible = true
+
+
+func _show_main_menu() -> void:
+	_menu.visible = true
+	_menu_view.visible = true
+
+
 ## Настройки возвращают туда, откуда их открыли: в главное меню или в паузу.
 func _on_settings_closed() -> void:
 	if state == State.MENU:
-		_menu.visible = true
-		_menu_view.visible = true
+		_show_main_menu()
 	else:
 		_pause.visible = true

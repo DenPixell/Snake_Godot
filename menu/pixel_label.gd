@@ -10,6 +10,8 @@ extends Control
 @export var pixel := 5
 @export var color := Color(0.4, 0.46, 0.33)
 @export var translate := true
+## Числа для шаблона вида «+%d К СКОРОСТИ»: подставляются после перевода.
+var values: Array = []
 
 
 func _ready() -> void:
@@ -26,4 +28,5 @@ func _draw() -> void:
 
 
 func _shown() -> String:
-	return Settings.t(text) if translate else text
+	var shown := Settings.t(text) if translate else text
+	return shown % values if not values.is_empty() else shown

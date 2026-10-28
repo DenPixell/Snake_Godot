@@ -30,6 +30,12 @@ unique_name_in_owner = true
 layout_mode = 2
 script = ExtResource("2_button")
 
+[node name="Tutorial" type="Control" parent="Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+script = ExtResource("2_button")
+text = "TUTORIAL"
+
 [node name="Settings" type="Control" parent="Buttons" unique_id=2048412254]
 unique_name_in_owner = true
 layout_mode = 2

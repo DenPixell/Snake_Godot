@@ -36,9 +36,15 @@ func test_menu_texts_have_russian() -> void:
 	check_eq(Texts.translate("PLAY", "en"), "PLAY", "английский как есть")
 
 
+func test_english_texts_drawable() -> void:
+	for text: String in Texts.RU.keys():
+		for ch in text.to_upper().replace("%D", "0"):
+			check(ch == " " or PixelArt.FONT.has(ch), "нет знака «%s» в «%s»" % [ch, text])
+
+
 func test_russian_texts_drawable() -> void:
 	# Каждая буква перевода должна быть в пиксельном шрифте.
 	for text: String in Texts.RU.values():
-		for ch in text.to_upper():
+		for ch in text.to_upper().replace("%D", "0"):
 			var glyph: String = PixelArt.SAME_AS_LATIN.get(ch, ch)
 			check(ch == " " or PixelArt.FONT.has(glyph), "нет буквы «%s» в «%s»" % [ch, text])
