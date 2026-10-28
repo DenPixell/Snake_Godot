@@ -8,10 +8,10 @@ const MODEL := preload("res://assets/hands/scene.gltf")
 const BASE_POSE := "Heart Pose"
 
 ## Хват левой руки в координатах Game Boy (метры и градусы). Правая — зеркально.
-@export var grip_position := Vector3(-0.062, -0.095, -0.028)
+@export var grip_position := Vector3(-0.0783, -0.1112, 0.0097)
 @export var grip_rotation := Vector3(40.7, -161.5, 46.6)
 ## Доворот кисти в осях самого Game Boy (X — к экрану/от экрана, Z — в плоскости экрана), градусы.
-@export var grip_twist := Vector3(0, 0, 60)
+@export var grip_twist := Vector3(-16.3, 13.4, 28.1)
 ## Куда смотрит локоть левой руки, тоже в координатах Game Boy.
 @export var elbow_hint := Vector3(-0.3, -0.3, 0.05)
 ## Кожа темнее и грязнее, чем в исходной текстуре, под хоррор-свет.
@@ -24,16 +24,16 @@ const BASE_POSE := "Heart Pose"
 ## и переключается между A и B. tip — две верхние фаланги: ими палец сгибается вверх-вниз.
 ## Углы посчитаны так, чтобы кончик пальца попадал в нужную кнопку. Правая рука — зеркально.
 @export var thumb_left := {
-	"rest": {"base": Vector3(-6.1, 1.7, 18.3), "tip": Vector3(-14.0, 5.8, 0.9)},
-	"gb_up": {"base": Vector3(-6.1, 1.7, 18.3), "tip": Vector3(-3.3, 44.2, -7.8)},
-	"gb_down": {"base": Vector3(-6.1, 1.7, 18.3), "tip": Vector3(11.1, 64.4, -29.2)},
-	"gb_left": {"base": Vector3(3.7, 4.0, 11.3), "tip": Vector3(-22.1, 4.0, -3.9)},
-	"gb_right": {"base": Vector3(-25.6, 50.5, -12.4), "tip": Vector3(-14.0, 5.8, 0.9)},
+	"rest": {"base": Vector3(5.9, 0.3, -0.4), "tip": Vector3(-3.6, 0.1, -1.6)},
+	"gb_up": {"base": Vector3(-3.3, 0.2, 0.8), "tip": Vector3(9.6, 0.4, 7.0)},
+	"gb_down": {"base": Vector3(16.2, 1.1, -0.5), "tip": Vector3(-13.9, 0.3, -5.9)},
+	"gb_left": {"base": Vector3(16.8, -0.2, -4.8), "tip": Vector3(-9.5, -0.8, -7.6)},
+	"gb_right": {"base": Vector3(-1.5, 1.0, 4.6), "tip": Vector3(4.0, 1.6, 6.5)},
 }
 @export var thumb_right := {
-	"rest": {"base": Vector3(-9.5, 1.6, 20.4), "tip": Vector3(-10.5, 6.1, 3.8)},
-	"gb_a": {"base": Vector3(-0.7, 3.6, 13.7), "tip": Vector3(-15.9, 5.0, 0.9)},
-	"gb_b": {"base": Vector3(-16.7, 12.4, 20.1), "tip": Vector3(-10.5, 6.1, 3.8)},
+	"rest": {"base": Vector3(0.6, 0.5, 1.3), "tip": Vector3(1.1, 0.4, 2.4)},
+	"gb_a": {"base": Vector3(7.7, 0.1, -2.6), "tip": Vector3(-0.6, -0.1, -0.9)},
+	"gb_b": {"base": Vector3(-1.7, 1.5, 5.4), "tip": Vector3(3.0, 1.2, 7.0)},
 }
 
 const ARM_L := ["Shoulder_2.L_02", "Forearm.L_03", "Hand.L_04"]
