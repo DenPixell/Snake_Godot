@@ -8,9 +8,12 @@ signal finished(score: int, won: bool)
 
 enum Mode { IDLE, COUNTDOWN, PLAYING, PAUSED, DYING }
 
-const SIZE := Vector2i(160, 176)
-const CELL := 6
-const FIELD_ORIGIN := Vector2i(34, 20)
+## Пропорции как у экрана настоящего Game Boy: 160 × 144.
+const SIZE := Vector2i(160, 144)
+const CELL := 5
+const FIELD_ORIGIN := Vector2i(32, 10)
+## Правая колонка со счётом и рекордом.
+const SIDE_X := 134
 const FIELD_SIZE := Vector2i(Board.WIDTH * CELL, Board.HEIGHT * CELL)
 const COUNTDOWN_TIME := 3.0
 const DYING_TIME := 1.5
@@ -20,9 +23,9 @@ const BLIND_FADE_CELLS := 2.5
 
 ## Слоты эффектов слева от поля: значок и таймер.
 const EFFECT_SLOTS := [
-	{"kind": Effects.Kind.INVERT, "icon": PixelArt.ICON_INVERT, "y": 26},
-	{"kind": Effects.Kind.BLIND, "icon": PixelArt.ICON_EYE, "y": 76},
-	{"kind": Effects.Kind.SPEED, "icon": PixelArt.ICON_LIGHTNING, "y": 126},
+	{"kind": Effects.Kind.INVERT, "icon": PixelArt.ICON_INVERT, "y": 14},
+	{"kind": Effects.Kind.BLIND, "icon": PixelArt.ICON_EYE, "y": 58},
+	{"kind": Effects.Kind.SPEED, "icon": PixelArt.ICON_LIGHTNING, "y": 100},
 ]
 
 var game: SnakeGame
@@ -135,20 +138,31 @@ func _draw() -> void:
 
 
 func _draw_hud() -> void:
-	PixelArt.draw_text(self, "SCORE", Vector2i(FIELD_ORIGIN.x, 6))
 	var score := game.score if game != null else 0
-	PixelArt.draw_number(self, score, 4, Vector2i(FIELD_ORIGIN.x + FIELD_SIZE.x - 26, 5), game != null)
+	PixelArt.draw_tiny(self, "SCORE", Vector2i(SIDE_X + 3, 14))
+	PixelArt.draw_number(self, score, 4, Vector2i(SIDE_X, 22), game != null)
+	# Лучший результат на этой сложности. На Easy рекордов нет — цифры только «призраком».
+	var best := _best_score()
+	PixelArt.draw_tiny(self, "BEST", Vector2i(SIDE_X + 5, 44))
+	PixelArt.draw_number(self, best, 4, Vector2i(SIDE_X, 52), best > 0)
 	# Рамка поля напечатана на стекле и горит всегда.
 	draw_rect(Rect2(FIELD_ORIGIN - Vector2i.ONE, FIELD_SIZE + Vector2i(2, 2)), PixelArt.INK, false, 1.0)
 	for slot: Dictionary in EFFECT_SLOTS:
 		_draw_effect_slot(slot)
 
 
+func _best_score() -> int:
+	if game == null or not Difficulty.has_leaderboard(game.level):
+		return 0
+	var entries := Records.board(game.level).entries
+	return entries[0]["score"] if not entries.is_empty() else 0
+
+
 func _draw_effect_slot(slot: Dictionary) -> void:
 	var icon: Array = slot["icon"]
 	var icon_width: int = icon[0].length()
 	var y: int = slot["y"]
-	var icon_origin := Vector2i(16 - icon_width / 2, y)
+	var icon_origin := Vector2i(15 - icon_width / 2, y)
 	var left := game.effects.time_left(slot["kind"]) if game != null else 0.0
 	# В последние полторы секунды значок мигает, предупреждая о конце эффекта.
 	var blink_off := left < 1.5 and fmod(Time.get_ticks_msec() / 1000.0, 0.3) < 0.15
@@ -156,13 +170,13 @@ func _draw_effect_slot(slot: Dictionary) -> void:
 	PixelArt.draw_pattern(self, icon, icon_origin, PixelArt.GHOST)
 	if lit:
 		PixelArt.draw_pattern(self, icon, icon_origin, PixelArt.INK)
-	PixelArt.draw_number(self, ceili(left), 2, Vector2i(9, y + 14), left > 0.0)
+	PixelArt.draw_number(self, ceili(left), 2, Vector2i(9, y + 13), left > 0.0)
 
 
 func _draw_field() -> void:
 	draw_rect(Rect2(FIELD_ORIGIN, FIELD_SIZE), PixelArt.MATRIX)
 	for brick in game.board.bricks():
-		draw_rect(Rect2(_cell_origin(brick), Vector2.ONE * (CELL - 1)), PixelArt.INK)
+		PixelArt.draw_pattern(self, PixelArt.WALL, _cell_origin(brick), PixelArt.INK)
 	_draw_item()
 	# Во время смерти змейка мигает.
 	if mode == Mode.DYING and fmod(_timer, 0.3) < 0.15:
@@ -181,7 +195,7 @@ func _draw_item() -> void:
 	PixelArt.draw_pattern(self, PixelArt.SPRITES[item.type], origin, PixelArt.INK)
 	if item.compact:
 		# Пометка «x2» над клеткой, а у верхнего края — под ней.
-		var above := origin + Vector2i(-1, -6)
+		var above := origin + Vector2i(-1, -CELL - 1)
 		if item.cells[0].y == 0:
 			above = origin + Vector2i(-1, CELL + 1)
 		PixelArt.draw_tiny(self, "x2", above)
@@ -207,13 +221,13 @@ func _draw_eyes() -> void:
 	var eyes: Array[Vector2i]
 	match game.direction:
 		Vector2i.UP:
-			eyes = [Vector2i(1, 1), Vector2i(3, 1)]
+			eyes = [Vector2i(1, 1), Vector2i(2, 1)]
 		Vector2i.DOWN:
-			eyes = [Vector2i(1, 3), Vector2i(3, 3)]
+			eyes = [Vector2i(1, 2), Vector2i(2, 2)]
 		Vector2i.LEFT:
-			eyes = [Vector2i(1, 1), Vector2i(1, 3)]
+			eyes = [Vector2i(1, 1), Vector2i(1, 2)]
 		_:
-			eyes = [Vector2i(3, 1), Vector2i(3, 3)]
+			eyes = [Vector2i(2, 1), Vector2i(2, 2)]
 	for eye in eyes:
 		draw_rect(Rect2(origin + eye, Vector2.ONE), PixelArt.MATRIX)
 

@@ -1,11 +1,11 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://b1shtirtrm7xq"]
 
-[ext_resource type="Script" path="res://screen/handheld.gd" id="1_handheld"]
-[ext_resource type="PackedScene" path="res://screen/game_screen.tscn" id="2_game"]
+[ext_resource type="Script" uid="uid://oew5msch7po3" path="res://screen/handheld.gd" id="1_handheld"]
+[ext_resource type="PackedScene" uid="uid://dddw8frbm5hjy" path="res://screen/game_screen.tscn" id="2_game"]
 
-[node name="Handheld" type="Node2D"]
+[node name="Handheld" type="Node2D" unique_id=1109857935]
 script = ExtResource("1_handheld")
 
-[node name="GameScreen" parent="." instance=ExtResource("2_game")]
+[node name="GameScreen" parent="." unique_id=1048311646 instance=ExtResource("2_game")]
 
-[node name="MenuLayer" type="Node2D" parent="."]
+[node name="MenuLayer" type="Node2D" parent="." unique_id=1504491631]

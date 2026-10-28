@@ -137,12 +137,12 @@ func _draw_menu() -> void:
 		Page.MAIN:
 			var title_width := PixelArt.text_width("SNAKE", 2)
 			PixelArt.draw_text(canvas, "SNAKE",
-					Vector2i(FIELD_ORIGIN.x + (FIELD_SIZE.x - title_width) / 2, FIELD_ORIGIN.y + 30),
+					Vector2i(FIELD_ORIGIN.x + (FIELD_SIZE.x - title_width) / 2, FIELD_ORIGIN.y + 24),
 					PixelArt.INK, 2)
-			_draw_list(canvas, MAIN_ITEMS, FIELD_ORIGIN.y + 80)
+			_draw_list(canvas, MAIN_ITEMS, FIELD_ORIGIN.y + 70)
 		Page.DIFFICULTY:
-			GameScreen.draw_lines(canvas, ["DIFFICULTY"], FIELD_ORIGIN.y + 30)
-			_draw_list(canvas, LEVEL_ITEMS, FIELD_ORIGIN.y + 60)
+			GameScreen.draw_lines(canvas, ["DIFFICULTY"], FIELD_ORIGIN.y + 26)
+			_draw_list(canvas, LEVEL_ITEMS, FIELD_ORIGIN.y + 52)
 		Page.LEADERBOARD:
 			_draw_leaderboard(canvas)
 		Page.NAME_ENTRY:
@@ -157,7 +157,7 @@ func _draw_menu() -> void:
 
 ## Пункты списка с треугольником-курсором слева от выбранного.
 func _draw_list(canvas: CanvasItem, items: Array, top: int) -> void:
-	var left := FIELD_ORIGIN.x + 26
+	var left := FIELD_ORIGIN.x + 18
 	for i in items.size():
 		var y := top + i * 14
 		PixelArt.draw_text(canvas, items[i], Vector2i(left, y))
@@ -167,25 +167,25 @@ func _draw_list(canvas: CanvasItem, items: Array, top: int) -> void:
 
 func _draw_leaderboard(canvas: CanvasItem) -> void:
 	var title := "< %s >" % Difficulty.Level.keys()[_board_level]
-	GameScreen.draw_lines(canvas, [title], FIELD_ORIGIN.y + 12)
+	GameScreen.draw_lines(canvas, [title], FIELD_ORIGIN.y + 9)
 	var entries := Records.board(_board_level).entries
 	for i in Leaderboard.SIZE:
-		var y := FIELD_ORIGIN.y + 28 + i * 11
-		var row := "%2d ---  ----" % (i + 1)
+		var y := FIELD_ORIGIN.y + 20 + i * 10
+		var row := "%2d --- ----" % (i + 1)
 		if i < entries.size():
-			row = "%2d %s  %04d" % [i + 1, entries[i]["name"], entries[i]["score"]]
-		PixelArt.draw_text(canvas, row, Vector2i(FIELD_ORIGIN.x + 14, y))
+			row = "%2d %s %04d" % [i + 1, entries[i]["name"], entries[i]["score"]]
+		PixelArt.draw_text(canvas, row, Vector2i(FIELD_ORIGIN.x + 15, y))
 
 
 func _draw_name_entry(canvas: CanvasItem) -> void:
-	GameScreen.draw_lines(canvas, ["NEW RECORD", "", "SCORE %d" % _last_score], FIELD_ORIGIN.y + 40)
+	GameScreen.draw_lines(canvas, ["NEW RECORD", "", "SCORE %d" % _last_score], FIELD_ORIGIN.y + 26)
 	var scale := 2
 	var step := (PixelArt.GLYPH_WIDTH + 3) * scale
 	var left := FIELD_ORIGIN.x + (FIELD_SIZE.x - step * Leaderboard.NAME_LENGTH) / 2
-	var y := FIELD_ORIGIN.y + 80
+	var y := FIELD_ORIGIN.y + 64
 	for i in Leaderboard.NAME_LENGTH:
 		var x := left + i * step
 		PixelArt.draw_text(canvas, LETTERS[_name_letters[i]], Vector2i(x, y), PixelArt.INK, scale)
 		if i == _name_cursor:
 			canvas.draw_rect(Rect2(x, y + 17, PixelArt.GLYPH_WIDTH * scale, 2), PixelArt.INK)
-	GameScreen.draw_lines(canvas, ["A - OK"], FIELD_ORIGIN.y + 125)
+	GameScreen.draw_lines(canvas, ["A - OK"], FIELD_ORIGIN.y + 106)
