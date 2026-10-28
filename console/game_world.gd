@@ -59,9 +59,7 @@ func _ready() -> void:
 	_pause.main_menu_pressed.connect(_back_to_main_menu)
 	_settings.closed.connect(_on_settings_closed)
 	_handheld.beep.connect(_gameboy.play_sound)
-	var ambience := Ambience.new()
-	add_child(ambience)
-	ambience.global_position = _camera.base_transform().origin
+	add_child(Ambience.new())
 	# В модели три подсвечника, на столе нужен только простой на одну свечу.
 	for unused: String in ["brass_candleholder_02", "brass_candleholder_03"]:
 		$Room/Candles.find_child(unused).visible = false
