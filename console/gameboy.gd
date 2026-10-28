@@ -28,7 +28,12 @@ const BUTTON_RED := Color(0.62, 0.05, 0.06)
 ## Модель в своих единицах шириной 343, настоящий Game Boy — 9 см.
 const MODEL_SCALE := 0.09 / 343.2
 
+## Яркость экрана: выключенный ЖК не чёрный, а тускло-серый.
+const SCREEN_ON := 1.0
+const SCREEN_OFF := 0.12
+
 var _buttons := {}
+var _screen_material: ShaderMaterial
 var _rest := {}
 var _dpad: Node3D
 
@@ -54,6 +59,7 @@ func _prepare_mesh(mesh: MeshInstance3D, screen_texture: Texture2D) -> void:
 		material.set_shader_parameter("uv_min", SCREEN_UV_MIN)
 		material.set_shader_parameter("uv_max", SCREEN_UV_MAX)
 		material.set_shader_parameter("flip_x", true)
+		_screen_material = material
 		mesh.material_override = material
 	elif name.contains("A_B_Buttons"):
 		mesh.material_override = _tinted(mesh, BUTTON_RED)
@@ -66,6 +72,10 @@ func _prepare_mesh(mesh: MeshInstance3D, screen_texture: Texture2D) -> void:
 		# Чёрный материал крестовины есть и на других деталях, берём только область крестовины спереди.
 		_dpad = MeshSplit.extract(mesh, DPAD_CENTER, _is_dpad, "DPad")
 		_rest[_dpad] = _dpad.transform
+
+
+func set_screen_on(on: bool) -> void:
+	_screen_material.set_shader_parameter("brightness", SCREEN_ON if on else SCREEN_OFF)
 
 
 ## Куда должен встать палец для каждой кнопки, в координатах самого Game Boy.
