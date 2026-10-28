@@ -7,34 +7,42 @@ extends Node3D
 const MODEL := preload("res://assets/hands/scene.gltf")
 const BASE_POSE := "Heart Pose"
 
-## Хват левой руки в координатах Game Boy (метры и градусы). Правая — зеркально.
-@export var grip_position := Vector3(-0.0785, -0.1102, 0.0085)
-@export var grip_rotation := Vector3(40.7, -161.5, 46.6)
-## Доворот кисти в осях самого Game Boy (X — к экрану/от экрана, Z — в плоскости экрана), градусы.
-@export var grip_twist := Vector3(5.1, 60.5, 51.1)
+## Хват левой руки в координатах Game Boy (метры): где запястье. Правая рука — зеркально.
+@export var grip_position := Vector3(-0.0491, -0.0903, -0.0223)
+## Куда смотрят пальцы левой руки и куда обращена ладонь (направления в координатах Game Boy).
+## Подобрано по точкам касания: ладонь на боку и задней крышке, пальцы за корпусом,
+## прямой большой палец сам смотрит на крестовину.
+@export var grip_fingers := Vector3(-0.0295, 0.9202, -0.3904)
+@export var grip_palm := Vector3(0.9752, 0.1122, 0.1908)
 ## Куда смотрит локоть левой руки, тоже в координатах Game Boy.
 @export var elbow_hint := Vector3(-0.3, -0.3, 0.05)
 ## Кожа темнее и грязнее, чем в исходной текстуре, под хоррор-свет.
 @export var skin_tint := Color(0.42, 0.4, 0.38)
 
-## Сгиб остальных пальцев, чтобы они обхватывали корпус сзади (градусы на каждую фалангу).
-@export var finger_curl := Vector3(35, 0, 0)
+## Сгиб остальных пальцев к ладони, градусы на каждую фалангу.
+@export var finger_curl := 54.6
 
-## Позы большого пальца (градусы). base — основание пальца: им палец ходит влево-вправо
-## и переключается между A и B. tip — две верхние фаланги: ими палец сгибается вверх-вниз.
-## Углы посчитаны так, чтобы кончик пальца попадал в нужную кнопку. Правая рука — зеркально.
+## Позы большого пальца (градусы). base — первая фаланга, tip — две следующие.
+## Углы посчитаны так, чтобы кончик пальца попадал в нужную кнопку, палец шёл к ней
+## по диагонали от нижнего угла и не проваливался в корпус. Правая рука — зеркально.
 @export var thumb_left := {
-	"rest": {"base": Vector3(3.5, 0.9, -1.3), "tip": Vector3(-4.3, 0.7, -0.9)},
-	"gb_up": {"base": Vector3(-9.6, 5.6, -2.5), "tip": Vector3(6.4, 5.3, 14.2)},
-	"gb_down": {"base": Vector3(7.9, 2.6, -3.7), "tip": Vector3(-14.3, 2.0, -4.8)},
-	"gb_left": {"base": Vector3(14.1, 2.6, -6.1), "tip": Vector3(-12.3, 1.9, -3.4)},
-	"gb_right": {"base": Vector3(-11.8, 4.6, -0.5), "tip": Vector3(2.8, 4.2, 9.8)},
+	"rest": {"base": Vector3(-2.8, 37.0, -46.7), "tip": Vector3(-45.1, 5.6, 21.9)},
+	"gb_up": {"base": Vector3(-2.3, 38.3, -39.2), "tip": Vector3(-40.2, 9.7, 24.6)},
+	"gb_down": {"base": Vector3(-2.9, 36.5, -49.5), "tip": Vector3(-52.2, 1.3, 19.9)},
+	"gb_left": {"base": Vector3(0.6, 36.1, -52.5), "tip": Vector3(-50.8, 5.5, 23.4)},
+	"gb_right": {"base": Vector3(-5.5, 38.6, -37.1), "tip": Vector3(-41.7, 5.7, 21.4)},
 }
 @export var thumb_right := {
-	"rest": {"base": Vector3(-2.7, 1.2, -0.1), "tip": Vector3(0.4, 0.7, 3.3)},
-	"gb_a": {"base": Vector3(4.3, 2.6, -3.7), "tip": Vector3(-3.5, 1.7, 4.0)},
-	"gb_b": {"base": Vector3(-12.9, 4.3, 0.3), "tip": Vector3(2.7, 2.7, 9.3)},
+	"rest": {"base": Vector3(-8.2, 32.2, -43.4), "tip": Vector3(-42.4, 3.4, 29.2)},
+	"gb_a": {"base": Vector3(-5.3, 32.0, -45.4), "tip": Vector3(-44.4, 5.2, 31.9)},
+	"gb_b": {"base": Vector3(-10.3, 33.4, -36.0), "tip": Vector3(-41.4, 2.2, 27.9)},
 }
+
+## Оси кости кисти в модели: пальцы смотрят вдоль +Y, ладонь — в сторону −X.
+const HAND_FINGERS_AXIS := Vector3.UP
+const HAND_PALM_AXIS := Vector3.LEFT
+## Сгиб фаланги к ладони — поворот вокруг локальной оси Z кости пальца.
+const FINGER_FLEX_AXIS := Vector3.BACK
 
 const ARM_L := ["Shoulder_2.L_02", "Forearm.L_03", "Hand.L_04"]
 const ARM_R := ["Shoulder_2.R_025", "Forearm.R_026", "Hand.R_027"]
@@ -63,17 +71,24 @@ func _ready() -> void:
 	_darken_skin(model)
 
 
-## Пальцы 1–4 (кроме большого), три фаланги на каждом, обе руки.
+## Пальцы 1–4 (кроме большого): три фаланги на каждом, обе руки.
 func _curl_fingers() -> void:
 	for bone in skeleton.get_bone_count():
 		var bone_name := skeleton.get_bone_name(bone)
-		if not bone_name.begins_with("Finger_") or bone_name.begins_with("Finger_5") or bone_name.contains("_end"):
+		if not bone_name.begins_with("Finger_") or bone_name.begins_with("Finger_5"):
 			continue
-		if bone_name.contains(".4."):
+		if bone_name.contains("_end") or bone_name.contains(".4."):
 			continue
 		var side := 1.0 if bone_name.contains(".L") else -1.0
-		var euler := finger_curl * Vector3(1.0, side, side) * (PI / 180.0)
-		skeleton.set_bone_pose_rotation(bone, skeleton.get_bone_pose_rotation(bone) * Quaternion.from_euler(euler))
+		var rotation := Quaternion(FINGER_FLEX_AXIS, deg_to_rad(finger_curl) * side)
+		skeleton.set_bone_pose_rotation(bone, skeleton.get_bone_pose_rotation(bone) * rotation)
+
+
+## Поворот кисти, при котором пальцы смотрят по fingers, а ладонь — по palm.
+static func grip_basis(fingers: Vector3, palm: Vector3) -> Basis:
+	var y := fingers.normalized()
+	var x := -(palm - y * palm.dot(y)).normalized()
+	return Basis(x, y, x.cross(y))
 
 
 ## Привязывает руки к Game Boy: создаёт на нём цели хвата и подключает IK.
@@ -84,9 +99,9 @@ func hold(gameboy: Node3D) -> void:
 		var mirror := Vector3(side, 1.0, 1.0)
 		var target := Marker3D.new()
 		target.position = grip_position * mirror
-		var euler := grip_rotation * Vector3(1.0, side, side) * (PI / 180.0)
-		var twist := grip_twist * Vector3(1.0, side, side) * (PI / 180.0)
-		target.basis = Basis.from_euler(twist) * Basis.from_euler(euler)
+		# Правая рука — зеркальная копия левой относительно вертикальной оси корпуса.
+		var flip := Basis.from_scale(mirror)
+		target.basis = flip * grip_basis(grip_fingers, grip_palm) * flip
 		gameboy.add_child(target)
 		targets.append(target)
 		var pole := Marker3D.new()
