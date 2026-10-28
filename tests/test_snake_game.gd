@@ -7,12 +7,13 @@ func test_starts_with_dot_and_length_three() -> void:
 	check_eq(game.item.type, Item.Type.DOT, "первый объект — точка")
 
 
-func test_moves_one_cell_per_second() -> void:
+func test_moves_at_start_speed() -> void:
 	var game := make_game()
 	var start := game.head()
-	game.tick(0.99)
+	var step_time := 1.0 / SnakeGame.START_SPEED
+	game.tick(step_time * 0.99)
 	check_eq(game.head(), start, "ещё не сдвинулась")
-	game.tick(0.02)
+	game.tick(step_time * 0.02)
 	check_eq(game.head(), start + Vector2i.UP, "сдвинулась на клетку")
 
 
@@ -75,7 +76,7 @@ func test_lightning_adds_three_speed() -> void:
 	var game := make_game()
 	put_item_ahead(game, Item.Type.LIGHTNING)
 	game.step()
-	check(is_equal_approx(game.speed(), 1.0 + 0.05 + 3.0), "скорость с молнией")
+	check(is_equal_approx(game.speed(), SnakeGame.START_SPEED + 0.05 + 3.0), "скорость с молнией")
 
 
 func test_speed_capped_at_fifteen() -> void:

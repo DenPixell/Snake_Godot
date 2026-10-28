@@ -10,7 +10,7 @@ signal won
 
 enum State { PLAYING, DEAD, WON }
 
-const START_SPEED := 1.0
+const START_SPEED := 5.0
 const SPEED_PER_ITEM := 0.05
 const MAX_SPEED := 15.0
 const LIGHTNING_BONUS := 3.0
