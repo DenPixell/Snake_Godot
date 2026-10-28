@@ -3,6 +3,9 @@ extends Node2D
 ## Всё, что показывает Game Boy: меню, выбор сложности, рекорды, игра, ввод имени, Game Over.
 ## Кнопки: крестовина — выбор, A — выбрать, B — назад, Start — в меню Game Boy.
 
+## Звук, который должен проиграть динамик Game Boy (имена — в audio/sounds.gd).
+signal beep(sound: String)
+
 enum Page { MAIN, DIFFICULTY, LEADERBOARD, GAME, NAME_ENTRY, GAME_OVER }
 
 const MAIN_ITEMS := ["PLAY", "LEADERBOARD"]
@@ -29,6 +32,7 @@ var _name_cursor := 0
 
 func _ready() -> void:
 	_game.finished.connect(_on_game_finished)
+	_game.beep.connect(beep.emit)
 	# Меню рисуется отдельным узлом поверх экрана игры.
 	_menu_layer.draw.connect(_draw_menu)
 
@@ -37,6 +41,7 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("gb_start") and page != Page.MAIN:
 		_game.stop()
 		_open(Page.MAIN)
+		beep.emit("back")
 	match page:
 		Page.MAIN:
 			_handle_list(MAIN_ITEMS.size(), _on_main_selected, Callable())
@@ -48,8 +53,10 @@ func _process(_delta: float) -> void:
 			_handle_name_entry()
 		Page.GAME_OVER:
 			if Input.is_action_just_pressed("gb_a"):
+				beep.emit("select")
 				_start_game()
 			elif Input.is_action_just_pressed("gb_b"):
+				beep.emit("back")
 				_open(Page.MAIN)
 	_menu_layer.queue_redraw()
 
@@ -75,11 +82,15 @@ func _open(new_page: Page, cursor := 0) -> void:
 func _handle_list(count: int, on_select: Callable, on_back: Callable) -> void:
 	if Input.is_action_just_pressed("gb_up"):
 		_cursor = wrapi(_cursor - 1, 0, count)
+		beep.emit("move")
 	elif Input.is_action_just_pressed("gb_down"):
 		_cursor = wrapi(_cursor + 1, 0, count)
+		beep.emit("move")
 	elif Input.is_action_just_pressed("gb_a"):
+		beep.emit("select")
 		on_select.call(_cursor)
 	elif Input.is_action_just_pressed("gb_b") and on_back.is_valid():
+		beep.emit("back")
 		on_back.call()
 
 
@@ -105,6 +116,8 @@ func _on_game_finished(score: int, won: bool) -> void:
 	_last_score = score
 	_last_won = won
 	_last_rank = -1
+	if not won:
+		beep.emit("over")
 	if Records.qualifies(_level, score):
 		_name_cursor = 0
 		_open(Page.NAME_ENTRY)
@@ -116,7 +129,9 @@ func _handle_leaderboard() -> void:
 	if Input.is_action_just_pressed("gb_left") or Input.is_action_just_pressed("gb_right"):
 		_board_level = Difficulty.Level.HARD if _board_level == Difficulty.Level.NORMAL \
 				else Difficulty.Level.NORMAL
+		beep.emit("move")
 	elif Input.is_action_just_pressed("gb_b"):
+		beep.emit("back")
 		_open(Page.MAIN, 1)
 
 
@@ -132,8 +147,13 @@ func _handle_name_entry() -> void:
 	elif Input.is_action_just_pressed("gb_right"):
 		_name_cursor = mini(_name_cursor + 1, Leaderboard.NAME_LENGTH - 1)
 	elif Input.is_action_just_pressed("gb_a"):
+		beep.emit("select")
 		_last_rank = Records.add(_level, _entered_name(), _last_score)
 		_open(Page.GAME_OVER)
+		return
+	else:
+		return
+	beep.emit("move")
 
 
 func _entered_name() -> String:

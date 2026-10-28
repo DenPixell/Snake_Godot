@@ -24,7 +24,7 @@ var _hovered := false
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	mouse_entered.connect(func() -> void: _hovered = true; queue_redraw())
+	mouse_entered.connect(func() -> void: _hovered = true; queue_redraw(); Sfx.play("ui_hover"))
 	mouse_exited.connect(func() -> void: _hovered = false; queue_redraw())
 	Settings.changed.connect(func() -> void: update_minimum_size(); queue_redraw())
 
@@ -35,6 +35,7 @@ func _get_minimum_size() -> Vector2:
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		Sfx.play("ui_click")
 		pressed.emit()
 		accept_event()
 

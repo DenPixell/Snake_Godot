@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Settings="*res://autoload/settings.gd"
 Records="*res://autoload/records.gd"
+Sfx="*res://autoload/sfx.gd"
 
 [display]
 

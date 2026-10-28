@@ -50,6 +50,10 @@ func _ready() -> void:
 	_pause.settings_pressed.connect(_open_settings)
 	_pause.main_menu_pressed.connect(_back_to_main_menu)
 	_settings.closed.connect(_on_settings_closed)
+	_handheld.beep.connect(_gameboy.play_sound)
+	var ambience := Ambience.new()
+	add_child(ambience)
+	ambience.global_position = _camera.base_transform().origin
 	# В модели три подсвечника, на столе нужен только простой на одну свечу.
 	for unused: String in ["brass_candleholder_02", "brass_candleholder_03"]:
 		$Room/Candles.find_child(unused).visible = false
@@ -66,6 +70,7 @@ func _enter_menu() -> void:
 	_hands.transform = _hands_rest.translated(HANDS_HIDDEN_OFFSET)
 	# Пока Game Boy лежит на столе, он не реагирует на кнопки.
 	_handheld.process_mode = Node.PROCESS_MODE_DISABLED
+	_gameboy.input_enabled = false
 	_menu.visible = true
 	_menu_view.visible = true
 
@@ -106,6 +111,7 @@ func _pause_game() -> void:
 	state = State.PAUSED
 	_handheld.pause_game()
 	_handheld.process_mode = Node.PROCESS_MODE_DISABLED
+	_gameboy.input_enabled = false
 	_camera.deactivate()
 	_pause.visible = true
 
@@ -114,6 +120,7 @@ func _resume() -> void:
 	state = State.PLAYING
 	_pause.visible = false
 	_handheld.process_mode = Node.PROCESS_MODE_INHERIT
+	_gameboy.input_enabled = true
 	_camera.activate()
 
 

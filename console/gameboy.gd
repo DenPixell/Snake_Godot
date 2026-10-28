@@ -32,14 +32,27 @@ const MODEL_SCALE := 0.09 / 343.2
 const SCREEN_ON := 1.0
 const SCREEN_OFF := 0.12
 
+## Пока Game Boy лежит на столе или игра на паузе, кнопки не нажимаются.
+var input_enabled := false
+
 var _buttons := {}
 var _screen_material: ShaderMaterial
+var _speaker := AudioStreamPlayer3D.new()
+var _clicker := AudioStreamPlayer3D.new()
 var _rest := {}
 var _dpad: Node3D
 
 
 ## screen_texture — картинка из SubViewport с экраном Game Boy.
 func setup(screen_texture: Texture2D) -> void:
+	# Динамик — внизу справа, у решётки; щелчки кнопок слышны тише и ближе.
+	for player: AudioStreamPlayer3D in [_speaker, _clicker]:
+		player.bus = Settings.EFFECTS_BUS
+		player.unit_size = 0.3
+		player.max_polyphony = 4
+		add_child(player)
+	_speaker.position = Vector3(0.03, -0.055, 0.01)
+	_clicker.volume_db = -8.0
 	var model: Node3D = MODEL.instantiate()
 	model.scale = Vector3.ONE * MODEL_SCALE
 	add_child(model)
@@ -72,6 +85,12 @@ func _prepare_mesh(mesh: MeshInstance3D, screen_texture: Texture2D) -> void:
 		# Чёрный материал крестовины есть и на других деталях, берём только область крестовины спереди.
 		_dpad = MeshSplit.extract(mesh, DPAD_CENTER, _is_dpad, "DPad")
 		_rest[_dpad] = _dpad.transform
+
+
+## Звук из динамика Game Boy. Имена звуков — в audio/sounds.gd.
+func play_sound(sound: String) -> void:
+	_speaker.stream = Sounds.get_stream(sound)
+	_speaker.play()
 
 
 func set_screen_on(on: bool) -> void:
@@ -116,10 +135,15 @@ func _tinted(mesh: MeshInstance3D, color: Color) -> Material:
 
 func _process(delta: float) -> void:
 	var blend := 1.0 - exp(-PRESS_SPEED * delta)
+	if input_enabled:
+		for action: String in ["gb_up", "gb_down", "gb_left", "gb_right", "gb_a", "gb_b", "gb_start"]:
+			if Input.is_action_just_pressed(action):
+				_clicker.stream = Sounds.get_stream("click")
+				_clicker.play()
 	for action: String in _buttons:
 		var pivot: Node3D = _buttons[action]
 		var target: Transform3D = _rest[pivot]
-		if Input.is_action_pressed(action):
+		if input_enabled and Input.is_action_pressed(action):
 			target = target.translated_local(Vector3(0, PRESS_DEPTH, 0))
 		pivot.transform = pivot.transform.interpolate_with(target, blend)
 	if _dpad != null:
@@ -128,9 +152,8 @@ func _process(delta: float) -> void:
 
 ## Крестовина качается: нажатая сторона уходит в корпус.
 func _dpad_target() -> Transform3D:
-	var tilt := Vector2(
-		Input.get_axis("gb_left", "gb_right"),
-		Input.get_axis("gb_down", "gb_up"),
-	)
+	var tilt := Vector2.ZERO
+	if input_enabled:
+		tilt = Vector2(Input.get_axis("gb_left", "gb_right"), Input.get_axis("gb_down", "gb_up"))
 	var rest: Transform3D = _rest[_dpad]
 	return rest.rotated_local(Vector3.FORWARD, tilt.x * DPAD_TILT).rotated_local(Vector3.RIGHT, tilt.y * DPAD_TILT)

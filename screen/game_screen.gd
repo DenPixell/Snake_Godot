@@ -5,6 +5,8 @@ extends Node2D
 ## Без партии рисует только напечатанные на стекле элементы и пустое поле — поверх него меню.
 
 signal finished(score: int, won: bool)
+## Звук, который должен проиграть динамик Game Boy (имена — в audio/sounds.gd).
+signal beep(sound: String)
 
 enum Mode { IDLE, COUNTDOWN, PLAYING, PAUSED, DYING }
 
@@ -48,6 +50,7 @@ func start(level: Difficulty.Level) -> void:
 	game = SnakeGame.new(level)
 	game.died.connect(_on_died)
 	game.won.connect(_on_won)
+	game.item_eaten.connect(_on_item_eaten)
 	_start_countdown()
 
 
@@ -70,9 +73,13 @@ func _process(delta: float) -> void:
 	_handle_input()
 	match mode:
 		Mode.COUNTDOWN:
+			var before := ceili(_timer)
 			_timer -= delta
 			if _timer <= 0.0:
 				mode = Mode.PLAYING
+				beep.emit("go")
+			elif ceili(_timer) != before:
+				beep.emit("tick")
 		Mode.PLAYING:
 			game.tick(delta)
 		Mode.DYING:
@@ -91,6 +98,7 @@ func _handle_input() -> void:
 					game.turn(_direction_of(action))
 			if Input.is_action_just_pressed("gb_a"):
 				mode = Mode.PAUSED
+				beep.emit("pause")
 		Mode.PAUSED:
 			if Input.is_action_just_pressed("gb_b"):
 				_start_countdown()
@@ -110,15 +118,30 @@ func _direction_of(action: String) -> Vector2i:
 func _start_countdown() -> void:
 	mode = Mode.COUNTDOWN
 	_timer = COUNTDOWN_TIME
+	beep.emit("tick")
 
 
 func _on_died() -> void:
 	mode = Mode.DYING
 	_timer = DYING_TIME
+	beep.emit("die")
 
 
 func _on_won() -> void:
+	beep.emit("win")
 	finished.emit(game.score, true)
+
+
+func _on_item_eaten(type: Item.Type) -> void:
+	match type:
+		Item.Type.DOT:
+			beep.emit("eat")
+		Item.Type.BIG_APPLE:
+			beep.emit("big")
+		Item.Type.BRICK:
+			beep.emit("brick")
+		_:
+			beep.emit("bad")
 
 
 func _update_blind() -> void:
