@@ -9,11 +9,12 @@ signal finished(score: int, won: bool)
 enum Mode { IDLE, COUNTDOWN, PLAYING, PAUSED, DYING }
 
 ## Пропорции как у экрана настоящего Game Boy: 160 × 144.
+## По краям оставлен запас в 3 пикселя: рамка корпуса чуть перекрывает края экрана.
 const SIZE := Vector2i(160, 144)
 const CELL := 5
-const FIELD_ORIGIN := Vector2i(32, 10)
+const FIELD_ORIGIN := Vector2i(29, 10)
 ## Правая колонка со счётом и рекордом.
-const SIDE_X := 134
+const SIDE_X := 131
 const FIELD_SIZE := Vector2i(Board.WIDTH * CELL, Board.HEIGHT * CELL)
 const COUNTDOWN_TIME := 3.0
 const DYING_TIME := 1.5
@@ -162,7 +163,7 @@ func _draw_effect_slot(slot: Dictionary) -> void:
 	var icon: Array = slot["icon"]
 	var icon_width: int = icon[0].length()
 	var y: int = slot["y"]
-	var icon_origin := Vector2i(15 - icon_width / 2, y)
+	var icon_origin := Vector2i(13 - icon_width / 2, y)
 	var left := game.effects.time_left(slot["kind"]) if game != null else 0.0
 	# В последние полторы секунды значок мигает, предупреждая о конце эффекта.
 	var blink_off := left < 1.5 and fmod(Time.get_ticks_msec() / 1000.0, 0.3) < 0.15
@@ -170,7 +171,7 @@ func _draw_effect_slot(slot: Dictionary) -> void:
 	PixelArt.draw_pattern(self, icon, icon_origin, PixelArt.GHOST)
 	if lit:
 		PixelArt.draw_pattern(self, icon, icon_origin, PixelArt.INK)
-	PixelArt.draw_number(self, ceili(left), 2, Vector2i(9, y + 13), left > 0.0)
+	PixelArt.draw_number(self, ceili(left), 2, Vector2i(7, y + 13), left > 0.0)
 
 
 func _draw_field() -> void:

@@ -7,9 +7,9 @@ const EYE := Vector3(0, 1.5, 0)
 ## Взгляд вниз на Game Boy.
 const VIEW_PITCH := deg_to_rad(-28.0)
 ## Расстояние от глаз до экрана.
-const SCREEN_DISTANCE := 0.2
+const SCREEN_DISTANCE := 0.23
 ## Центр экрана выше центра корпуса — так экран оказывается по центру кадра.
-const SCREEN_ABOVE_CENTER := 0.033
+const SCREEN_ABOVE_CENTER := 0.012
 ## Плечи ниже глаз и чуть впереди.
 const SHOULDERS_FROM_EYE := Vector3(0, -0.22, -0.03)
 
