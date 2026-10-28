@@ -42,10 +42,6 @@ func deactivate() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not active:
 		return
-	# Esc отпускает мышь, повторный Esc снова захватывает. Позже здесь откроется меню паузы.
-	if event.is_action_pressed("pause_menu"):
-		var captured := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if captured else Input.MOUSE_MODE_CAPTURED
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_look -= event.relative * MOUSE_SENSITIVITY
 		_look = _look.clamp(-LOOK_LIMIT, LOOK_LIMIT)

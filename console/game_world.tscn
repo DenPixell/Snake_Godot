@@ -4,31 +4,12 @@
 [ext_resource type="Script" uid="uid://db61f6j5yknx2" path="res://console/gameboy.gd" id="2_gameboy"]
 [ext_resource type="PackedScene" uid="uid://b1shtirtrm7xq" path="res://screen/handheld.tscn" id="3_handheld"]
 [ext_resource type="Script" uid="uid://xsdfk4emkcgj" path="res://console/candle_light.gd" id="4_candle"]
-[ext_resource type="PackedScene" path="res://console/hold_pose.tscn" id="5_pose"]
-[ext_resource type="PackedScene" path="res://assets/room/WoodenTable_01/WoodenTable_01.gltf" id="6_table"]
-[ext_resource type="PackedScene" path="res://assets/room/ArmChair_01/ArmChair_01.gltf" id="7_chair"]
-[ext_resource type="PackedScene" path="res://assets/room/brass_candleholders/brass_candleholders.gltf" id="8_candles"]
-[ext_resource type="Script" path="res://menu/title.gd" id="9_title"]
+[ext_resource type="PackedScene" uid="uid://b6mfvnf6jky0q" path="res://console/hold_pose.tscn" id="5_pose"]
+[ext_resource type="PackedScene" uid="uid://yg2soulpbdir" path="res://assets/room/WoodenTable_01/WoodenTable_01.gltf" id="6_table"]
+[ext_resource type="PackedScene" uid="uid://byshf3b8u1jh5" path="res://assets/room/ArmChair_01/ArmChair_01.gltf" id="7_chair"]
+[ext_resource type="PackedScene" uid="uid://vq1jkk5togtu" path="res://assets/room/brass_candleholders/brass_candleholders.gltf" id="8_candles"]
+[ext_resource type="Script" uid="uid://bic0ii1rdyf21" path="res://menu/title.gd" id="9_title"]
 [ext_resource type="PackedScene" path="res://menu/main_menu.tscn" id="10_menu"]
-
-[sub_resource type="FastNoiseLite" id="Noise_floor"]
-frequency = 0.02
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture_floor"]
-width = 256
-height = 256
-seamless = true
-noise = SubResource("Noise_floor")
-
-[sub_resource type="StandardMaterial3D" id="Material_floor"]
-albedo_color = Color(0.16, 0.12, 0.09, 1)
-albedo_texture = SubResource("NoiseTexture_floor")
-roughness = 0.9
-uv1_scale = Vector3(4, 4, 4)
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
-material = SubResource("Material_floor")
-size = Vector2(8, 8)
 
 [sub_resource type="Environment" id="Environment_dark"]
 background_mode = 1
@@ -44,6 +25,25 @@ fog_enabled = true
 fog_light_color = Color(0.02, 0.02, 0.025, 1)
 fog_density = 0.6
 
+[sub_resource type="FastNoiseLite" id="Noise_floor"]
+frequency = 0.02
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture_floor"]
+width = 256
+height = 256
+noise = SubResource("Noise_floor")
+seamless = true
+
+[sub_resource type="StandardMaterial3D" id="Material_floor"]
+albedo_color = Color(0.16, 0.12, 0.09, 1)
+albedo_texture = SubResource("NoiseTexture_floor")
+roughness = 0.9
+uv1_scale = Vector3(4, 4, 4)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
+material = SubResource("Material_floor")
+size = Vector2(8, 8)
+
 [node name="GameWorld" type="Node3D" unique_id=1287233165]
 script = ExtResource("1_world")
 
@@ -57,33 +57,33 @@ render_target_update_mode = 4
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1558186520]
 environment = SubResource("Environment_dark")
 
-[node name="Room" type="Node3D" parent="."]
+[node name="Room" type="Node3D" parent="." unique_id=966016220]
 
-[node name="Floor" type="MeshInstance3D" parent="Room"]
+[node name="Floor" type="MeshInstance3D" parent="Room" unique_id=1908660386]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
 mesh = SubResource("PlaneMesh_floor")
 
-[node name="Table" parent="Room" instance=ExtResource("6_table")]
+[node name="Table" parent="Room" unique_id=1609000960 instance=ExtResource("6_table")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, -0.55)
 
-[node name="Chair" parent="Room" instance=ExtResource("7_chair")]
+[node name="Chair" parent="Room" unique_id=1554492862 instance=ExtResource("7_chair")]
 transform = Transform3D(-1, 0, 1.22465e-16, 0, 1, 0, -1.22465e-16, 0, -1, 0, 0.35, 0.32)
 
-[node name="Candles" parent="Room" instance=ExtResource("8_candles")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.95, 0.8990, -0.68)
+[node name="Candles" parent="Room" unique_id=1990746796 instance=ExtResource("8_candles")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.95, 0.899, -0.68)
 
-[node name="GameBoyOnTable" type="Marker3D" parent="Room"]
-transform = Transform3D(0.906308, -0.422618, 2.58779e-17, 0, 6.12323e-17, 1, -0.422618, -0.906308, 5.54953e-17, 0.1, 0.9100, -0.45)
+[node name="GameBoyOnTable" type="Marker3D" parent="Room" unique_id=1605778358]
+transform = Transform3D(0.906308, -0.422618, 2.58779e-17, 0, 6.12323e-17, 1, -0.422618, -0.906308, 5.54953e-17, 0.1, 0.91, -0.45)
 
-[node name="MenuView" type="Node3D" parent="."]
+[node name="MenuView" type="Node3D" parent="." unique_id=216627009]
 
-[node name="Title" type="Node3D" parent="MenuView"]
+[node name="Title" type="Node3D" parent="MenuView" unique_id=1044673973]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.36, 0.17, -1)
 script = ExtResource("9_title")
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="." unique_id=835203946]
 
-[node name="MainMenu" parent="UI" instance=ExtResource("10_menu")]
+[node name="MainMenu" parent="UI" unique_id=22672340 instance=ExtResource("10_menu")]
 
 [node name="HoldPose" parent="." unique_id=896065860 instance=ExtResource("5_pose")]
 
@@ -97,7 +97,7 @@ light_energy = 0.03
 omni_range = 0.2
 
 [node name="Candle" type="OmniLight3D" parent="." unique_id=894094804]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.55, 1.2700, -0.68)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.55, 1.27, -0.68)
 light_color = Color(1, 0.72, 0.45, 1)
 light_energy = 0.35
 shadow_enabled = true

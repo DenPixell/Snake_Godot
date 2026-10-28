@@ -3,11 +3,11 @@ extends Node3D
 ## Состояния: главное меню → переход (камера едет к Game Boy, руки поднимают его) → игра.
 ## Камера, руки и место Game Boy в руках берутся из сцены позы console/hold_pose.tscn.
 
-enum State { MENU, TRANSITION, PLAYING }
+enum State { MENU, TRANSITION, PLAYING, PAUSED }
 
 ## Откуда смотрит камера в главном меню и куда.
-@export var menu_camera_position := Vector3(-0.6, 1.2, -0.05)
-@export var menu_camera_target := Vector3(-0.2, 0.88, -0.55)
+@export var menu_camera_position := Vector3(-0.85, 1.4, 0.15)
+@export var menu_camera_target := Vector3(-0.55, 1.0, -0.45)
 ## Где руки ждут в меню: ниже кадра, потом поднимаются вместе с Game Boy.
 const HANDS_HIDDEN_OFFSET := Vector3(0, -0.45, 0.15)
 const CAMERA_MOVE_TIME := 2.2
@@ -28,6 +28,8 @@ var _hands_rest: Transform3D
 @onready var _menu_view: Node3D = $MenuView
 @onready var _table_spot: Node3D = $Room/GameBoyOnTable
 @onready var _menu: MainMenu = $UI/MainMenu
+@onready var _pause := PauseMenu.new()
+@onready var _settings := SettingsMenu.new()
 
 
 func _ready() -> void:
@@ -39,6 +41,15 @@ func _ready() -> void:
 	_menu_view.global_transform = Transform3D.IDENTITY.looking_at(
 			menu_camera_target - menu_camera_position).translated(menu_camera_position)
 	_menu.play_pressed.connect(_start_game)
+	_menu.settings_pressed.connect(_open_settings)
+	$UI.add_child(_pause)
+	$UI.add_child(_settings)
+	_pause.visible = false
+	_settings.visible = false
+	_pause.continue_pressed.connect(_resume)
+	_pause.settings_pressed.connect(_open_settings)
+	_pause.main_menu_pressed.connect(_back_to_main_menu)
+	_settings.closed.connect(_on_settings_closed)
 	# В модели три подсвечника, на столе нужен только простой на одну свечу.
 	for unused: String in ["brass_candleholder_02", "brass_candleholder_03"]:
 		$Room/Candles.find_child(unused).visible = false
@@ -74,7 +85,55 @@ func _start_game() -> void:
 
 
 func _begin_playing() -> void:
-	state = State.PLAYING
 	_gameboy.set_screen_on(true)
+	_resume()
+
+
+## Esc: в игре открывает паузу, на паузе — продолжает, в настройках — закрывает их.
+func _unhandled_input(event: InputEvent) -> void:
+	if not event.is_action_pressed("pause_menu"):
+		return
+	if _settings.visible:
+		_settings.close()
+	elif state == State.PLAYING:
+		_pause_game()
+	elif state == State.PAUSED:
+		_resume()
+	get_viewport().set_input_as_handled()
+
+
+func _pause_game() -> void:
+	state = State.PAUSED
+	_handheld.pause_game()
+	_handheld.process_mode = Node.PROCESS_MODE_DISABLED
+	_camera.deactivate()
+	_pause.visible = true
+
+
+func _resume() -> void:
+	state = State.PLAYING
+	_pause.visible = false
 	_handheld.process_mode = Node.PROCESS_MODE_INHERIT
 	_camera.activate()
+
+
+func _back_to_main_menu() -> void:
+	_pause.visible = false
+	_handheld.reset()
+	_enter_menu()
+
+
+func _open_settings() -> void:
+	_menu.visible = false
+	_menu_view.visible = false
+	_pause.visible = false
+	_settings.visible = true
+
+
+## Настройки возвращают туда, откуда их открыли: в главное меню или в паузу.
+func _on_settings_closed() -> void:
+	if state == State.MENU:
+		_menu.visible = true
+		_menu_view.visible = true
+	else:
+		_pause.visible = true

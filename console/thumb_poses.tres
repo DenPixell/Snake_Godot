@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="ThumbPoses" format=3]
+[gd_resource type="Resource" script_class="ThumbPoses" format=3 uid="uid://bf44r4fvrahll"]
 
-[ext_resource type="Script" path="res://console/thumb_poses.gd" id="1"]
+[ext_resource type="Script" uid="uid://eh3gnyd3llqd" path="res://console/thumb_poses.gd" id="1"]
 
 [resource]
 script = ExtResource("1")

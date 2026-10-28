@@ -54,6 +54,18 @@ func _process(_delta: float) -> void:
 	_menu_layer.queue_redraw()
 
 
+## Esc-меню во время партии: ставим и саму игру на паузу, чтобы после него не умереть сразу.
+func pause_game() -> void:
+	if page == Page.GAME:
+		_game.pause()
+
+
+## Выход в главное меню: партия прерывается, Game Boy возвращается в своё меню.
+func reset() -> void:
+	_game.stop()
+	_open(Page.MAIN)
+
+
 func _open(new_page: Page, cursor := 0) -> void:
 	page = new_page
 	_cursor = cursor

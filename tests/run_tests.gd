@@ -8,6 +8,7 @@ const TEST_FILES: Array[String] = [
 	"res://tests/test_spawner.gd",
 	"res://tests/test_snake_game.gd",
 	"res://tests/test_leaderboard.gd",
+	"res://tests/test_settings.gd",
 ]
 
 

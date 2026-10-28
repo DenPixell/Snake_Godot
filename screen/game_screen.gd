@@ -51,6 +51,12 @@ func start(level: Difficulty.Level) -> void:
 	_start_countdown()
 
 
+## Ставит партию на паузу Game Boy (поле скрыто, продолжить — кнопкой B).
+func pause() -> void:
+	if mode in [Mode.PLAYING, Mode.COUNTDOWN]:
+		mode = Mode.PAUSED
+
+
 func stop() -> void:
 	game = null
 	mode = Mode.IDLE
